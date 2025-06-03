@@ -1,0 +1,29 @@
+package com.viwath.music_player.data.data_source
+
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import com.viwath.music_player.domain.model.FavoriteMusic
+import kotlinx.coroutines.flow.Flow
+
+@Dao
+interface FavoriteMusicDao {
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertFavorite(music: FavoriteMusic)
+
+    @Delete
+    suspend fun removeFavorite(music: FavoriteMusic)
+
+    @Query("SELECT * FROM favorite_music")
+    fun getFavoriteMusic(): Flow<FavoriteMusic>
+
+    @Query("SELECT * FROM favorite_music ORDER BY addDate DESC")
+    fun getFavoriteMusicByDate(): Flow<FavoriteMusic>
+
+    @Query("SELECT * FROM favorite_music ORDER BY title DESC")
+    fun getFavoriteMusicByTitle(): Flow<FavoriteMusic>
+
+}
