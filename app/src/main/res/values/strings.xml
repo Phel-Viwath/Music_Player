@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Music_Player</string>
+
+    <string name="image">Image</string>
+    <string name="favorite">Favorite</string>
+    <string name="play_next">PLay Next</string>
+    <string name="play_previous">Play Previous</string>
+    <string name="play_pause">Play/Pause</string>
+    <string name="exit">Exit</string>
 </resources>

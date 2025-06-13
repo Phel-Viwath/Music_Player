@@ -25,7 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.R
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel

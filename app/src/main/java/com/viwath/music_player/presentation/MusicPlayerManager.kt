@@ -15,17 +15,12 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-class MusicPlayerManager @Inject constructor(
-    @ApplicationContext private val context: Context
-) {
+class MusicPlayerManager @Inject constructor(@ApplicationContext private val context: Context) {
     private var musicService: MusicService? = null
     private var isServiceBound = false
 
     private val _icConnected = MutableStateFlow(false)
     val isConnected: StateFlow<Boolean> get() = _icConnected.asStateFlow()
-
-    private val _playbackState = MutableStateFlow(PlaybackState())
-    val playbackState: StateFlow<PlaybackState> get() = _playbackState.asStateFlow()
 
     private val serviceConnection = object: ServiceConnection{
         override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
@@ -64,7 +59,7 @@ class MusicPlayerManager @Inject constructor(
     fun playMusic(music: Music, musics: List<Music> = emptyList()){
         musicService?.let { service ->
             if (musics.isNotEmpty()){
-                service.setPlayList(musics)
+                service.setPlaylist(musics)
                 val selectedIndex = musics.indexOfFirst { it.id == music.id }
                 if (selectedIndex >= 0) {
                     service.seekToPosition(selectedIndex)
@@ -75,6 +70,9 @@ class MusicPlayerManager @Inject constructor(
     }
     fun pauseMusic(){
         musicService?.pauseMusic()
+    }
+    fun resumeMusic(){
+        musicService?.resumeMusic()
     }
     fun nextMusic() {
         musicService?.nextMusic()

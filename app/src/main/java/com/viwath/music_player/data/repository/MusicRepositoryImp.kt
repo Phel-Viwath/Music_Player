@@ -3,8 +3,7 @@ package com.viwath.music_player.data.repository
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
-import androidx.compose.ui.graphics.asImageBitmap
-import com.viwath.music_player.core.util.GetImage.getEmbeddedPicture
+import com.viwath.music_player.core.util.GetImage.getImagePath
 import com.viwath.music_player.data.data_source.FavoriteMusicDao
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
@@ -64,9 +63,9 @@ class MusicRepositoryImp(
                 val trackNumber = cursor.getInt(trackCol)
                 val dateCol = cursor.getString(dateCol)
 
-                val image = data.getEmbeddedPicture()?.asImageBitmap()
+                val imagePath = data.getImagePath(context)
 
-                val music = Music(id, title, artist, album, duration, image, data,trackNumber, dateCol)
+                val music = Music(id, title, artist, album, duration, imagePath, data,trackNumber, dateCol)
                 musicFiles.add(music)
             }
         }
@@ -75,22 +74,26 @@ class MusicRepositoryImp(
 
 
     override suspend fun addFavorite(music: FavoriteMusic) {
-        TODO("Not yet implemented")
+        dao.addFavorite(music)
     }
 
     override suspend fun removeFavorite(music: FavoriteMusic) {
-        TODO("Not yet implemented")
+        dao.removeFavorite(music)
     }
 
     override fun getFavoriteMusic(): Flow<FavoriteMusic> {
-        TODO("Not yet implemented")
+        return dao.getFavoriteMusic()
     }
 
     override fun getFavoriteMusicByDate(): Flow<FavoriteMusic> {
-        TODO("Not yet implemented")
+        return dao.getFavoriteMusicByDate()
     }
 
     override fun getFavoriteMusicByTitle(): Flow<FavoriteMusic> {
-        TODO("Not yet implemented")
+        return dao.getFavoriteMusicByTitle()
+    }
+
+    override fun getFavoriteMusicByDuration(): Flow<FavoriteMusic> {
+        return dao.getFavoriteMusicByDuration()
     }
 }

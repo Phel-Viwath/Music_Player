@@ -10,34 +10,18 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
-import androidx.navigation.NavType
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
-import com.viwath.music_player.core.util.Constant
-import com.viwath.music_player.domain.model.Music
-import com.viwath.music_player.presentation.ui.screen.Screen
-import com.viwath.music_player.presentation.ui.screen.music_detail.MusicDetailScreen
-import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
+import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MusicViewModel by viewModels()
-    private var musicList: List<Music> = emptyList()
-    private var currentMusic: Music? = null
+    private val visualizerViewModel by viewModels<VisualizerViewModel>()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -70,60 +54,17 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Music_PlayerTheme {
-                val navController = rememberNavController()
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-//                    bottomBar = {
-//                        NavigationBar{
-//                            val currentDestination = navController.currentBackStackEntry?.destination?.route
-//
-//                        }
-//                    }
-                ) { innerPadding ->
-
-                    NavHost(
-                        navController = navController,
-                        startDestination = "music_list_screen"
-                    ){
-                        composable(
-                            route = Screen.MusicListScreenRoute.route
-                        ){
-                            MusicListScreen(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(innerPadding)
-                                    .background(Color.Black),
-                                navController = navController,
-                                viewModel = viewModel,
-                                onMusicListLoaded = { loadMusicList ->
-                                    musicList = loadMusicList
-                                },
-                                onMusicSelected = { selectedMusic ->
-                                    currentMusic = selectedMusic
-                                }
-                            )
-                        }
-
-                        composable(
-                            route = Screen.MusicDetailScreenRoute.route + "/{musicId}",
-                            arguments = listOf(navArgument(Constant.PARAM_ID){type = NavType.LongType})
-                        ) {
-                            MusicDetailScreen(
-                                modifier = Modifier
-                                    .padding(innerPadding),
-                                music = currentMusic ?: throw Exception("Music is null"),
-                            )
-                        }
-                    }
-
-                }
+                MainApp(
+                    viewModel,
+                    visualizerViewModel
+                )
             }
         }
     }
 
     private fun checkPermissions() {
         val readPermission = getReadPermission()
-        val permissions = mutableListOf(readPermission)
+        val permissions = mutableListOf(readPermission, Manifest.permission.RECORD_AUDIO)
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
@@ -139,7 +80,11 @@ class MainActivity : ComponentActivity() {
             ) == PackageManager.PERMISSION_GRANTED
         } else true
 
-        if (!hasReadPermission || !hasNotificationPermission) {
+        val hasRecordAudioPermission = ContextCompat.checkSelfPermission(
+            this, Manifest.permission.RECORD_AUDIO
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasReadPermission || !hasNotificationPermission || !hasRecordAudioPermission) {
             permissionLauncher.launch(permissions.toTypedArray())
         } else {
             viewModel.loadMusicFiles()

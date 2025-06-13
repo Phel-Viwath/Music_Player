@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,13 +24,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.R
 import com.viwath.music_player.domain.model.Music
 
@@ -37,65 +36,68 @@ import com.viwath.music_player.domain.model.Music
 fun MusicListItem(
     music: Music,
     onItemClick: (Music) -> Unit,
-    onItemMenuClick: (Music) -> Unit
+    onItemMenuClick: (Music) -> Unit,
+    isPlaying: Boolean = false
 ){
-    Row(
-        modifier = Modifier
-            .background(Color.Transparent)
-            .fillMaxWidth()
-            .clickable{ onItemClick(music) }
-            .padding(10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ){
-        Image(
-            painter = BitmapPainter(music.image ?: ImageBitmap.imageResource(id = R.drawable.ic_launcher_foreground)),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
+    val backgroundColor = if (isPlaying) Color(0xFF1DB954) else Color.Transparent
+    Box(modifier = Modifier.background(backgroundColor)){
+        Row(
             modifier = Modifier
-                .size(50.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .border(
-                    BorderStroke(1.dp, Color.Black),
-                    shape = RoundedCornerShape(8.dp)
+                .background(Color.Transparent)
+                .fillMaxWidth()
+                .clickable{ onItemClick(music) }
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ){
+            Image(
+                painter = rememberAsyncImagePainter(music.imagePath ?: R.drawable.ic_launcher_foreground),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(8.dp))
+                    .border(
+                        BorderStroke(1.dp, Color.Black),
+                        shape = RoundedCornerShape(8.dp)
+                    )
+                    .background(color = Color.Black)
+            )
+
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalAlignment = Alignment.Start,
+            ) {
+                Text(
+                    text = music.title,
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 1
                 )
-                .background(color = Color.Black)
-        )
+                Text(
+                    text = music.artist,
+                    color = Color.Gray,
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.Normal,
+                    maxLines = 1
+                )
+            }
 
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(4.dp),
-            horizontalAlignment = Alignment.Start,
-        ) {
-            Text(
-                text = music.title,
-                color = Color.White,
-                fontSize = 16.sp,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1
-            )
-            Text(
-                text = music.artist,
-                color = Color.Gray,
-                fontSize = 12.sp,
-                fontWeight = FontWeight.Normal,
-                maxLines = 1
-            )
-        }
-
-        IconButton(
-            modifier = Modifier
-                .wrapContentSize(),
-            onClick = { onItemMenuClick(music) },
-        ) {
-            Icon(
-                imageVector = Icons.Default.MoreVert,
-                contentDescription = "More",
-                tint = Color.White
-            )
+            IconButton(
+                modifier = Modifier
+                    .wrapContentSize(),
+                onClick = { onItemMenuClick(music) },
+            ) {
+                Icon(
+                    imageVector = Icons.Default.MoreVert,
+                    contentDescription = "More",
+                    tint = Color.White
+                )
+            }
         }
     }
-
 }

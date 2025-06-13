@@ -12,5 +12,6 @@ interface MusicRepository {
     fun getFavoriteMusic(): Flow<FavoriteMusic>
     fun getFavoriteMusicByDate(): Flow<FavoriteMusic>
     fun getFavoriteMusicByTitle(): Flow<FavoriteMusic>
+    fun getFavoriteMusicByDuration(): Flow<FavoriteMusic>
 
 }

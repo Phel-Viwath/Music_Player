@@ -74,6 +74,8 @@ dependencies {
 
     // view-model
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
+    // Live-Data
+    implementation(libs.androidx.runtime.livedata)
 
     //
     implementation(libs.dagger.hilt.android)
@@ -85,6 +87,11 @@ dependencies {
     // room database
     implementation(libs.androidx.room.runtime)
     ksp(libs.androidx.room.compiler)
+
+    implementation(libs.coil.compose)
+
+    implementation(libs.androidx.material.icons.extended)
+
 }
 
 hilt {

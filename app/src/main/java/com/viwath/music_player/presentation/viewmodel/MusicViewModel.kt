@@ -32,6 +32,9 @@ class MusicViewModel @Inject constructor(
     private val _playbackState = MutableStateFlow(PlaybackState())
     val playbackState: StateFlow<PlaybackState> get() = _playbackState.asStateFlow()
 
+    private val _currentMusic = mutableStateOf<Music?>(null)
+    val currentMusic: State<Music?> get() = _currentMusic
+
     init {
         Log.d("MusicViewModel", "Init ViewModel: Called")
         loadMusicFiles()
@@ -71,11 +74,16 @@ class MusicViewModel @Inject constructor(
         }
     }
     fun playMusic(music: Music, musics: List<Music> = emptyList()) {
+        _currentMusic.value = music
         musicPlayerManager.playMusic(music, musics)
     }
 
     fun pauseMusic() {
         musicPlayerManager.pauseMusic()
+    }
+
+    fun resumeMusic() {
+        musicPlayerManager.resumeMusic()
     }
 
     fun nextMusic() {

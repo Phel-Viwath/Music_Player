@@ -1,8 +1,10 @@
 package com.viwath.music_player.presentation.ui.screen.state
 
+import androidx.compose.runtime.Stable
 import androidx.media3.common.Player
 import com.viwath.music_player.domain.model.Music
 
+@Stable
 data class PlaybackState(
     val isPlaying: Boolean = false,
     val currentPosition: Long = 0L,
