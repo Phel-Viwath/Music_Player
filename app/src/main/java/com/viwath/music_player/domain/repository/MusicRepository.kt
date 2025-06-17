@@ -9,9 +9,9 @@ interface MusicRepository {
 
     suspend fun addFavorite(music: FavoriteMusic)
     suspend fun removeFavorite(music: FavoriteMusic)
-    fun getFavoriteMusic(): Flow<FavoriteMusic>
-    fun getFavoriteMusicByDate(): Flow<FavoriteMusic>
-    fun getFavoriteMusicByTitle(): Flow<FavoriteMusic>
-    fun getFavoriteMusicByDuration(): Flow<FavoriteMusic>
+    fun getFavoriteMusic(): Flow<List<FavoriteMusic>>
+    fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>>
+    fun getFavoriteMusicByTitle(): Flow<List<FavoriteMusic>>
+    fun getFavoriteMusicByDuration():Flow<List<FavoriteMusic>>
 
 }

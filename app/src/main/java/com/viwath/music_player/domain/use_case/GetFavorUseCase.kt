@@ -1,12 +1,13 @@
 package com.viwath.music_player.domain.use_case
 
+import android.util.Log
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.toList
 import javax.inject.Inject
 
 class GetFavorUseCase @Inject constructor(
@@ -20,7 +21,9 @@ class GetFavorUseCase @Inject constructor(
                 SortOrder.DURATION -> repository.getFavoriteMusicByDuration()
                 SortOrder.TITLE -> repository.getFavoriteMusicByTitle()
             }
-            emit(Resource.Success(musics.toList()))
+            musics.collect { Log.d("GetFavorUseCase", "invoke: $it") }
+
+            emit(Resource.Success(musics.first()))
         }catch (e: Exception){
             emit(Resource.Error(e.message ?: "Unknown error"))
         }

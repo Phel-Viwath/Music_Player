@@ -21,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MusicListItem
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
@@ -29,8 +29,8 @@ import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 fun MusicListScreen(
     modifier: Modifier = Modifier,
     viewModel: MusicViewModel = hiltViewModel(),
-    onMusicListLoaded: (List<Music>) -> Unit = {},
-    onMusicSelected: (Music) -> Unit = {}
+    onMusicListLoaded: (List<MusicDto>) -> Unit = {},
+    onMusicSelected: (MusicDto) -> Unit = {}
 ){
     val state = viewModel.state.value
     val showDialog = remember { mutableStateOf(false) }

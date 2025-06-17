@@ -29,6 +29,7 @@ import com.viwath.music_player.core.util.Constant.CHANNEL_ID
 import com.viwath.music_player.core.util.Constant.NOTIFICATION_ID
 import com.viwath.music_player.core.util.GetImage.getImageBitMap
 import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.toMusicDto
 import com.viwath.music_player.presentation.MainActivity
 import com.viwath.music_player.presentation.ui.screen.state.PlaybackState
 import dagger.hilt.android.AndroidEntryPoint
@@ -232,6 +233,18 @@ class MusicService : Service() {
         }
     }
 
+    fun repeatAll(){
+        exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
+    }
+
+    fun repeatOne(){
+        exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+    }
+
+    fun shuffleMode(isShuffle: Boolean){
+        exoPlayer.shuffleModeEnabled = isShuffle
+    }
+
     @Suppress("DEPRECATION")
     fun stopService() {
         exoPlayer.stop()
@@ -275,7 +288,7 @@ class MusicService : Service() {
             isPlaying = exoPlayer.isPlaying,
             currentPosition = position,
             duration = duration,
-            currentMusic = currentMusic,
+            currentMusic = currentMusic?.toMusicDto(),
             playbackState = exoPlayer.playbackState
         )
 

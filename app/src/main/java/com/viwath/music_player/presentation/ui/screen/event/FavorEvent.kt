@@ -1,0 +1,11 @@
+package com.viwath.music_player.presentation.ui.screen.event
+
+import com.viwath.music_player.domain.model.MusicDto
+
+sealed class FavorEvent {
+    data object DeleteFavorite: FavorEvent()
+    data object InsertFavorite: FavorEvent()
+
+    data class PasteDeleteData(val music: MusicDto): FavorEvent()
+    data class PasteInsertData(val music: MusicDto): FavorEvent()
+}

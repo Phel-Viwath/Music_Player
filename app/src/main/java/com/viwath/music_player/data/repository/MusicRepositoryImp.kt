@@ -81,19 +81,19 @@ class MusicRepositoryImp(
         dao.removeFavorite(music)
     }
 
-    override fun getFavoriteMusic(): Flow<FavoriteMusic> {
+    override fun getFavoriteMusic(): Flow<List<FavoriteMusic>> {
         return dao.getFavoriteMusic()
     }
 
-    override fun getFavoriteMusicByDate(): Flow<FavoriteMusic> {
+    override fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>> {
         return dao.getFavoriteMusicByDate()
     }
 
-    override fun getFavoriteMusicByTitle(): Flow<FavoriteMusic> {
+    override fun getFavoriteMusicByTitle(): Flow<List<FavoriteMusic>> {
         return dao.getFavoriteMusicByTitle()
     }
 
-    override fun getFavoriteMusicByDuration(): Flow<FavoriteMusic> {
+    override fun getFavoriteMusicByDuration():Flow<List<FavoriteMusic>> {
         return dao.getFavoriteMusicByDuration()
     }
 }

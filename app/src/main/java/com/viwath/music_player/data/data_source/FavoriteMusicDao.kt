@@ -18,16 +18,16 @@ interface FavoriteMusicDao {
     suspend fun removeFavorite(music: FavoriteMusic)
 
     @Query("SELECT * FROM favorite_music")
-    fun getFavoriteMusic(): Flow<FavoriteMusic>
+    fun getFavoriteMusic(): Flow<List<FavoriteMusic>>
 
     @Query("SELECT * FROM favorite_music ORDER BY addDate DESC")
-    fun getFavoriteMusicByDate(): Flow<FavoriteMusic>
+    fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>>
 
     @Query("SELECT * FROM favorite_music ORDER BY title DESC")
-    fun getFavoriteMusicByTitle(): Flow<FavoriteMusic>
+    fun getFavoriteMusicByTitle(): Flow<List<FavoriteMusic>>
 
     @Query("SELECT * FROM favorite_music ORDER BY duration DESC")
-    fun getFavoriteMusicByDuration(): Flow<FavoriteMusic>
+    fun getFavoriteMusicByDuration(): Flow<List<FavoriteMusic>>
 
 
 }

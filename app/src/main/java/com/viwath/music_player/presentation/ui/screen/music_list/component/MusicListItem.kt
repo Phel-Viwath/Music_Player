@@ -30,13 +30,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.R
-import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 
 @Composable
 fun MusicListItem(
-    music: Music,
-    onItemClick: (Music) -> Unit,
-    onItemMenuClick: (Music) -> Unit,
+    music: MusicDto,
+    onItemClick: (MusicDto) -> Unit,
+    onItemMenuClick: (MusicDto) -> Unit,
     isPlaying: Boolean = false
 ){
     val backgroundColor = if (isPlaying) Color(0xFF1DB954) else Color.Transparent

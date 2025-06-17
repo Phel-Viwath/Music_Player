@@ -2,11 +2,14 @@ package com.viwath.music_player.domain.use_case
 
 import android.util.Log
 import com.viwath.music_player.core.util.Resource
+import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 import com.viwath.music_player.domain.model.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import javax.inject.Inject
@@ -14,19 +17,43 @@ import javax.inject.Inject
 class GetMusicsUseCase @Inject constructor(
     private val musicRepository: MusicRepository
 ) {
-    operator fun invoke(sortOrder: SortOrder): Flow<Resource<List<Music>>> = flow {
+    operator fun invoke(sortOrder: SortOrder): Flow<Resource<List<MusicDto>>> = flow {
         emit(Resource.Loading())
         try {
             val musicFiles = musicRepository.getMusicFiles()
+            val favoriteMusicList = musicRepository.getFavoriteMusic().first()
+            val mergedList = mergeList(musicFiles, favoriteMusicList)
             Log.d("GetMusicUseCase", "invoke: $musicFiles")
             val musics = when (sortOrder) {
-                SortOrder.TITLE -> musicFiles.sortedBy { it.title }
-                SortOrder.DURATION -> musicFiles.sortedBy { it.duration }
-                SortOrder.DATE -> musicFiles.sortedBy { it.addDate }
+                SortOrder.TITLE -> mergedList.sortedBy { it.title }
+                SortOrder.DURATION -> mergedList.sortedBy { it.duration }
+                SortOrder.DATE -> mergedList.sortedBy { it.addDate }
             }
             emit(Resource.Success(musics))
         }catch (e: Exception){
             emit(Resource.Error(e.message ?: "Unknown error"))
         }
     }.flowOn(Dispatchers.IO)
+
+    private fun mergeList(
+        musicList: List<Music>,
+        favoriteMusicList: List<FavoriteMusic>
+    ): List<MusicDto>{
+        val favoriteIds = favoriteMusicList.map { it.id }
+
+        return musicList.map { music ->
+            MusicDto(
+                id = music.id,
+                title = music.title,
+                artist = music.artist,
+                album = music.album,
+                duration = music.duration,
+                imagePath = music.imagePath,
+                uri = music.uri,
+                trackNumber = music.trackNumber,
+                addDate = music.addDate,
+                isFavorite = music.id in favoriteIds
+            )
+        }
+    }
 }

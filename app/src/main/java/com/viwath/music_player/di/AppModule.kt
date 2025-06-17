@@ -7,7 +7,11 @@ import androidx.room.Room
 import com.viwath.music_player.data.data_source.FavoriteMusicDatabase
 import com.viwath.music_player.data.repository.MusicRepositoryImp
 import com.viwath.music_player.domain.repository.MusicRepository
+import com.viwath.music_player.domain.use_case.AddFavorUseCase
+import com.viwath.music_player.domain.use_case.FavoriteUseCase
+import com.viwath.music_player.domain.use_case.GetFavorUseCase
 import com.viwath.music_player.domain.use_case.GetMusicsUseCase
+import com.viwath.music_player.domain.use_case.RemoveFavorUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,5 +57,15 @@ object AppModule {
         repeatMode = ExoPlayer.REPEAT_MODE_ALL
     }
 
+    // provide favor use-case
+    @Provides
+    @Singleton
+    fun provideFavorUseCase(
+        repository: MusicRepository
+    ): FavoriteUseCase = FavoriteUseCase(
+        addFavorUseCase = AddFavorUseCase(repository),
+        removeFavorUseCase = RemoveFavorUseCase(repository),
+        getFavorUseCase = GetFavorUseCase(repository)
+    )
 
 }

@@ -1,5 +1,8 @@
 package com.viwath.music_player.presentation.ui.screen
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,33 +19,44 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
-import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainApp(
-    musicViewModel: MusicViewModel,
-    visualizerViewModel: VisualizerViewModel
+    musicViewModel: MusicViewModel
 ){
     val navController = rememberNavController()
 
-    var musicList by remember { mutableStateOf<List<Music>>(emptyList()) }
-    var currentMusic by remember { mutableStateOf<Music?>(null) }
+    var musicList by remember { mutableStateOf<List<MusicDto>>(emptyList()) }
+    var currentMusic by remember { mutableStateOf<MusicDto?>(null) }
     var showMusicDetail by remember { mutableStateOf(false) }
-    var showMiniPlayer by remember { mutableStateOf(false) }
-
 
     Scaffold (
-        bottomBar = { BottomNavigationBar(navController) }
+        modifier = Modifier.background(Color.Cyan),
+        bottomBar = {
+            Box{
+                Column {
+                    if (!showMusicDetail && currentMusic != null){
+                        MiniPlayer(
+                            music = currentMusic!!,
+                            musicViewModel = musicViewModel,
+                            onTap = { showMusicDetail = true }
+                        )
+                    }
+                    BottomNavigationBar(navController)
+                }
+            }
+        }
     ){ innerPadding ->
         NavHost(
             modifier = Modifier.padding(innerPadding),
@@ -68,21 +82,9 @@ fun MainApp(
         BottomSheetMusic(
             currentMusic = currentMusic!!,
             musicViewModel = musicViewModel,
-            visualizerViewModel = visualizerViewModel,
             onDismiss = { showMusicDetail = it }
         )
     }
-
-    if (!showMusicDetail && currentMusic != null){
-        MiniPlayer(
-            music = currentMusic!!,
-            musicViewModel = musicViewModel,
-            onTap = {}
-        )
-    }
-
-
-
 
 }
 

@@ -87,6 +87,17 @@ class MusicPlayerManager @Inject constructor(@ApplicationContext private val con
         musicService?.seekTo(position)
     }
 
+    fun shuffleMode(isShuffle: Boolean){
+        musicService?.shuffleMode(isShuffle)
+    }
+
+    fun repeatAll(){
+        musicService?.repeatAll()
+    }
+
+    fun repeatOne(){
+        musicService?.repeatOne()
+    }
 
 
 }

@@ -1,4 +1,14 @@
 package com.viwath.music_player.domain.use_case
 
-class AddFavorUseCase {
+import com.viwath.music_player.domain.model.FavoriteMusic
+import com.viwath.music_player.domain.repository.MusicRepository
+import javax.inject.Inject
+
+class AddFavorUseCase @Inject constructor(
+    private val repository: MusicRepository
+){
+    @Throws(Exception::class)
+    suspend operator fun invoke(music: FavoriteMusic){
+        repository.addFavorite(music)
+    }
 }

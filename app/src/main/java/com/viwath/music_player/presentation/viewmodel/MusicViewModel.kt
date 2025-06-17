@@ -9,7 +9,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 import com.viwath.music_player.domain.model.SortOrder
+import com.viwath.music_player.domain.model.toMusic
 import com.viwath.music_player.domain.use_case.GetMusicsUseCase
 import com.viwath.music_player.presentation.MusicPlayerManager
 import com.viwath.music_player.presentation.ui.screen.state.MusicState
@@ -23,8 +25,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class MusicViewModel @Inject constructor(
+    private val musicPlayerManager: MusicPlayerManager,
     private val useCase: GetMusicsUseCase,
-    private val musicPlayerManager: MusicPlayerManager
 ): ViewModel(){
     private val _state = mutableStateOf(MusicState())
     val state: State<MusicState> get() = _state
@@ -55,6 +57,11 @@ class MusicViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        musicPlayerManager.unbindService()
+    }
+
     fun loadMusicFiles(){
         viewModelScope.launch {
             useCase(SortOrder.TITLE).collect { result ->
@@ -73,7 +80,9 @@ class MusicViewModel @Inject constructor(
             }
         }
     }
-    fun playMusic(music: Music, musics: List<Music> = emptyList()) {
+    fun playMusic(musicDto: MusicDto, musics: List<MusicDto> = emptyList()) {
+        val music = musicDto.toMusic()
+        val musics = musics.map { it.toMusic() }
         _currentMusic.value = music
         musicPlayerManager.playMusic(music, musics)
     }
@@ -94,16 +103,24 @@ class MusicViewModel @Inject constructor(
         musicPlayerManager.previousMusic()
     }
 
-    fun stopMusic() {
-        musicPlayerManager.stopMusic()
-    }
+//    fun stopMusic() {
+//        musicPlayerManager.stopMusic()
+//    }
 
     fun seekTo(position: Long) {
         musicPlayerManager.seekTo(position)
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        musicPlayerManager.unbindService()
+    fun shuffleMode(isShuffle: Boolean){
+        musicPlayerManager.shuffleMode(isShuffle)
     }
+
+    fun repeatOne(){
+        musicPlayerManager.repeatOne()
+    }
+
+    fun repeatAll(){
+        musicPlayerManager.repeatAll()
+    }
+
 }

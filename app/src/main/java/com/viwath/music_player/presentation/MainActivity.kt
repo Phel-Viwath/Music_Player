@@ -21,7 +21,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val viewModel: MusicViewModel by viewModels()
-    private val visualizerViewModel by viewModels<VisualizerViewModel>()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -54,10 +53,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Music_PlayerTheme {
-                MainApp(
-                    viewModel,
-                    visualizerViewModel
-                )
+                MainApp(viewModel)
             }
         }
     }

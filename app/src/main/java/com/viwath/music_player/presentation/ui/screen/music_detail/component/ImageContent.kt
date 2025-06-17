@@ -17,12 +17,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.R
-import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
 
 @Composable
 fun ImageContent(
     modifier: Modifier = Modifier,
-    music: Music
+    music: MusicDto
 ){
     Box(
         modifier = modifier,

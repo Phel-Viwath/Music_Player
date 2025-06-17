@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Icon
@@ -16,6 +17,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,18 +29,24 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.viwath.music_player.R
-import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.presentation.ui.screen.state.FavoriteToggleState
+import com.viwath.music_player.presentation.ui.screen.state.PlayingMode
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
 @Composable
 fun ControlContent(
     modifier: Modifier = Modifier,
-    music: Music,
+    musicDto: MusicDto,
+    favoriteToggleState: FavoriteToggleState,
     viewModel: MusicViewModel,
     onFavoriteClick: () -> Unit
 ){
-    
     val playbackState by viewModel.playbackState.collectAsState()
+    var playingMode = remember { mutableStateOf(PlayingMode.REPEAT_ALL) }
+    val favoriteIcon = if (favoriteToggleState == FavoriteToggleState.FAVORITE)
+        Icons.Default.Favorite
+    else Icons.Default.FavoriteBorder
 
     Box(
         modifier = modifier,
@@ -58,7 +67,7 @@ fun ControlContent(
 
                 Column(modifier = Modifier.weight(0.85f)) {
                     Text(
-                        text = playbackState.currentMusic?.title ?: music.title,
+                        text = playbackState.currentMusic?.title ?: musicDto.title,
                         color = Color.White,
                         fontStyle = FontStyle.Normal,
                         fontWeight = FontWeight.Bold,
@@ -70,15 +79,18 @@ fun ControlContent(
                     )
                 }
 
+                // Favorite
                 IconButton(
                     modifier = Modifier
                         .weight(0.15f)
                         .padding(start = 8.dp),
-                    onClick = { onFavoriteClick() }
+                    onClick = {
+                        onFavoriteClick()
+                    }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.FavoriteBorder,
-                        tint = Color.White,
+                        imageVector = favoriteIcon,
+                        tint  = if (favoriteToggleState == FavoriteToggleState.FAVORITE) Color.Red else Color.White,
                         contentDescription = null,
                         modifier = Modifier
                             .size(24.dp)
@@ -88,7 +100,7 @@ fun ControlContent(
 
             // artist name
             Text(
-                text = playbackState.currentMusic?.artist ?: music.artist,
+                text = playbackState.currentMusic?.artist ?: musicDto.artist,
                 color = Color.LightGray,
                 fontStyle = FontStyle.Normal,
                 fontWeight = FontWeight.Normal,
@@ -118,12 +130,31 @@ fun ControlContent(
                 // repeat
                 IconButton(
                     onClick = {
-
+                        playingMode.value = when (playingMode.value) {
+                            PlayingMode.REPEAT_ALL -> {
+                                viewModel.repeatOne()
+                                PlayingMode.REPEAT_ONE
+                            }
+                            PlayingMode.REPEAT_ONE -> {
+                                viewModel.shuffleMode(true)
+                                PlayingMode.SHUFFLE
+                            }
+                            PlayingMode.SHUFFLE -> {
+                                viewModel.shuffleMode(false)
+                                viewModel.repeatAll()
+                                PlayingMode.REPEAT_ALL
+                            }
+                        }
                     },
                     modifier = Modifier.size(56.dp)
                 ) {
+                    val icon = when (playingMode.value) {
+                        PlayingMode.REPEAT_ALL -> R.drawable.ic_repeat
+                        PlayingMode.REPEAT_ONE -> R.drawable.ic_repeat_once
+                        PlayingMode.SHUFFLE -> R.drawable.ic_shuffle
+                    }
                     Icon(
-                        painterResource(R.drawable.ic_repeat),
+                        painter = painterResource(icon),
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier
@@ -151,7 +182,7 @@ fun ControlContent(
                 IconButton(
                     onClick = {
                         if (!playbackState.isPlaying)
-                            viewModel.playMusic(music)
+                            viewModel.playMusic(musicDto)
                         else viewModel.pauseMusic()
                     },
                     modifier = Modifier.size(72.dp)
