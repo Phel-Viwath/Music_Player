@@ -46,7 +46,7 @@ fun MusicListItem(
                 .background(Color.Transparent)
                 .fillMaxWidth()
                 .clickable{ onItemClick(music) }
-                .padding(10.dp),
+                .padding(start = 14.dp, top = 8.dp, bottom = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ){
@@ -55,13 +55,12 @@ fun MusicListItem(
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
-                    .size(50.dp)
+                    .size(60.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .border(
                         BorderStroke(1.dp, Color.Black),
                         shape = RoundedCornerShape(8.dp)
                     )
-                    .background(color = Color.Black)
             )
 
             Column(

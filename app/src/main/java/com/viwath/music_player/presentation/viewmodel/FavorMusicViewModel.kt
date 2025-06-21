@@ -22,7 +22,6 @@ class FavorMusicViewModel @Inject constructor(
     private val _state = mutableStateOf(FavorMusicState())
     val state: State<FavorMusicState> get() = _state
 
-
     init {
         loadFavorMusicList(SortOrder.DATE)
     }
@@ -80,7 +79,5 @@ class FavorMusicViewModel @Inject constructor(
             useCase.removeFavorUseCase(favorMusic)
         }
     }
-
-
 
 }

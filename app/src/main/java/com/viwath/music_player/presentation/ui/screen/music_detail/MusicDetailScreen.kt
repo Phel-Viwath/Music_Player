@@ -1,6 +1,7 @@
 package com.viwath.music_player.presentation.ui.screen.music_detail
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -15,6 +16,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,12 +45,13 @@ fun MusicDetailScreen(
         currentMusic = music
     }
 
-    LaunchedEffect(music.id) {
+    // Update favorite status whenever music.id changes OR when the screen becomes visible
+    LaunchedEffect(music.id, music.isFavorite) {
         isFavorite = music.isFavorite
     }
 
-    Box(modifier = modifier){
 
+    Box(modifier = modifier){
         currentMusic.imagePath?.let { path ->
             Image(
                 painter = rememberAsyncImagePainter(path),

@@ -6,7 +6,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -24,23 +26,23 @@ fun ImageContent(
     modifier: Modifier = Modifier,
     music: MusicDto
 ){
+
     Box(
-        modifier = modifier,
+        modifier = modifier
+            .padding(20.dp),
         contentAlignment = Alignment.Center
     ){
         Image(
             painter = rememberAsyncImagePainter(music.imagePath ?: R.drawable.ic_launcher_foreground),
-            contentDescription = null,
+            contentDescription = "${music.id}",
             contentScale = ContentScale.Crop,
             modifier = Modifier
-                .fillMaxSize()
-                .padding(28.dp)
-                .clip(RoundedCornerShape(8.dp))
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
                 .border(
                     BorderStroke(1.dp, Color.Transparent),
                     shape = RoundedCornerShape(8.dp)
                 )
-                .background(color = Color.Black)
         )
     }
 }

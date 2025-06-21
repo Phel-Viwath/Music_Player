@@ -10,11 +10,13 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.compose.runtime.SideEffect
+import androidx.compose.ui.graphics.Color
 import androidx.core.content.ContextCompat
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
-import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -53,6 +55,18 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Music_PlayerTheme {
+
+                val backgroundColor = Color(0xFF191834)
+                // Set status bar color to match background
+                val systemUiController = rememberSystemUiController()
+
+                SideEffect {
+                    systemUiController.setStatusBarColor(
+                        color = backgroundColor,
+                        darkIcons = false
+                    )
+                }
+
                 MainApp(viewModel)
             }
         }
