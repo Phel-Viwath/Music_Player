@@ -2,6 +2,7 @@ package com.viwath.music_player.presentation.viewmodel
 
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateSetOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Resource
@@ -22,6 +23,8 @@ class FavorMusicViewModel @Inject constructor(
     private val _state = mutableStateOf(FavorMusicState())
     val state: State<FavorMusicState> get() = _state
 
+    private val _setOfFavoriteId = mutableStateSetOf<String?>()
+
     init {
         loadFavorMusicList(SortOrder.DATE)
     }
@@ -34,9 +37,14 @@ class FavorMusicViewModel @Inject constructor(
             is FavorEvent.PasteInsertData -> {
                 _state.value = _state.value.copy(music = event.music)
             }
+            is FavorEvent.PasteCurrentMusicId -> {
+                _setOfFavoriteId.add(event.id)
+            }
 
             is FavorEvent.DeleteFavorite -> deleteFavorMusic()
             is FavorEvent.InsertFavorite -> insertFavorite()
+            is FavorEvent.AddCurrentFavorite -> addCurrentFavorite(event.id)
+            is FavorEvent.RemoveCurrentFavorite -> removeCurrentFavorite(event.id)
         }
     }
 
@@ -56,6 +64,20 @@ class FavorMusicViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun isFavorite(id: String): Boolean {
+        return _setOfFavoriteId.contains(id)
+    }
+
+    private fun addCurrentFavorite(id: String){
+        if (_setOfFavoriteId.contains(id)) return
+        _setOfFavoriteId.add(id)
+    }
+
+    private fun removeCurrentFavorite(id: String){
+        if (!_setOfFavoriteId.contains(id)) return
+        _setOfFavoriteId.remove(id)
     }
 
     private fun insertFavorite(){
@@ -79,5 +101,8 @@ class FavorMusicViewModel @Inject constructor(
             useCase.removeFavorUseCase(favorMusic)
         }
     }
+
+
+    
 
 }

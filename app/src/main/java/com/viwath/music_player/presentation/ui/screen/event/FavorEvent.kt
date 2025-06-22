@@ -6,6 +6,10 @@ sealed class FavorEvent {
     data object DeleteFavorite: FavorEvent()
     data object InsertFavorite: FavorEvent()
 
+    data class AddCurrentFavorite(val id: String): FavorEvent()
+    data class RemoveCurrentFavorite(val id: String): FavorEvent()
+
     data class PasteDeleteData(val music: MusicDto): FavorEvent()
     data class PasteInsertData(val music: MusicDto): FavorEvent()
+    data class PasteCurrentMusicId(val id: String): FavorEvent()
 }

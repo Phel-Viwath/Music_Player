@@ -1,7 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.music_detail
 
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -16,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +38,8 @@ fun MusicDetailScreen(
     val playbackState by viewModel.playbackState.collectAsState()
     var currentMusic = playbackState.currentMusic ?: music
     var isFavorite by remember(music.id) { mutableStateOf(music.isFavorite) }
+    var isCurrentFavorite by remember { mutableStateOf(false) }
+    val currentMusicFavorite = favorViewModel.isFavorite(currentMusic.id.toString())
 
     LaunchedEffect(music) {
         currentMusic = music
@@ -48,6 +48,10 @@ fun MusicDetailScreen(
     // Update favorite status whenever music.id changes OR when the screen becomes visible
     LaunchedEffect(music.id, music.isFavorite) {
         isFavorite = music.isFavorite
+    }
+
+    LaunchedEffect(favorViewModel) {
+        isCurrentFavorite = currentMusicFavorite
     }
 
 
@@ -80,13 +84,20 @@ fun MusicDetailScreen(
                     .weight(1f),
                 viewModel = viewModel,
                 musicDto = currentMusic,
-                favoriteToggleState = if (isFavorite) FavoriteToggleState.FAVORITE else FavoriteToggleState.NOT_FAVORITE,
+                favoriteToggleState = if (isCurrentFavorite) {
+                    FavoriteToggleState.FAVORITE
+                } else {
+                    if (isFavorite) FavoriteToggleState.FAVORITE
+                    else FavoriteToggleState.NOT_FAVORITE
+                },
                 onFavoriteClick = {
                     isFavorite = !isFavorite
                     if (isFavorite) {
+                        favorViewModel.onEvent(FavorEvent.AddCurrentFavorite(currentMusic.id.toString()))
                         favorViewModel.onEvent(FavorEvent.PasteInsertData(currentMusic))
                         favorViewModel.onEvent(FavorEvent.InsertFavorite)
                     }else{
+                        favorViewModel.onEvent(FavorEvent.RemoveCurrentFavorite(currentMusic.id.toString()))
                         favorViewModel.onEvent(FavorEvent.PasteDeleteData(currentMusic))
                         favorViewModel.onEvent(FavorEvent.DeleteFavorite)
                     }
