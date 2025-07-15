@@ -1,11 +1,7 @@
 package com.viwath.music_player.presentation.ui.screen.music_list
 
 import android.util.Log
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
@@ -19,10 +15,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.viwath.music_player.domain.model.MusicDto
-import com.viwath.music_player.presentation.ui.screen.music_list.component.MusicListItem
+import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.ui.screen.component.MusicList
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
 @Composable
@@ -34,7 +29,7 @@ fun MusicListScreen(
 ){
     val state = viewModel.state.value
     val showDialog = remember { mutableStateOf(false) }
-    val currentMusic = viewModel.currentMusic
+    val currentMusic = viewModel.currentMusic.value
 
     LaunchedEffect(state.error) {
         if (state.error.isNotBlank())
@@ -48,30 +43,23 @@ fun MusicListScreen(
         }
     }
 
-
     Log.d("MusicListScreen", "MusicListScreen: ${state.musicFiles}")
     Box(
         modifier = modifier
     ){
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.Transparent),
-        ) {
-            items(state.musicFiles, key = {it.id}) { music ->
-                val isPlaying = currentMusic.value?.id == music.id
-                MusicListItem(
-                    music = music,
-                    onItemClick = { selectedMusic ->
-                        onMusicSelected(selectedMusic)
+        if (state.musicFiles.isNotEmpty()){
+            MusicList(
+                modifier = Modifier,
+                musicList = state.musicFiles,
+                currentMusic = currentMusic,
+                onMusicSelected = { selectedMusic ->
+                    val isPlaying = currentMusic?.id == selectedMusic.id
+                    if (!isPlaying) {
                         viewModel.playMusic(selectedMusic, state.musicFiles)
-                    },
-                    onItemMenuClick = {
-
-                    },
-                    isPlaying = isPlaying
-                )
-            }
+                    }
+                    onMusicSelected(selectedMusic)
+                }
+            )
         }
 
         if (showDialog.value){

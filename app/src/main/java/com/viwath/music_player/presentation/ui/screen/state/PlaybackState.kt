@@ -2,7 +2,7 @@ package com.viwath.music_player.presentation.ui.screen.state
 
 import androidx.compose.runtime.Stable
 import androidx.media3.common.Player
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 
 @Stable
 data class PlaybackState(

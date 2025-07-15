@@ -29,7 +29,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.viwath.music_player.R
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.state.FavoriteToggleState
 import com.viwath.music_player.presentation.ui.screen.state.PlayingMode
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel

@@ -1,6 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.event
 
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 
 sealed class FavorEvent {
     data object DeleteFavorite: FavorEvent()

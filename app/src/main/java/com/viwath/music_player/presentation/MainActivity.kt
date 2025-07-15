@@ -6,38 +6,37 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
-import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlin.getValue
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MusicViewModel by viewModels()
+    private val musicViewModel: MusicViewModel by viewModels()
+    private val playlistViewModel : PlaylistViewModel by viewModels()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
-        val postNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.POST_NOTIFICATIONS
-        } else {
-            ""
-        }
-        val readPermissionGranted = permissions[getReadPermission()] != true
-        val notificationPermissionGranted = permissions[postNotificationPermission] == true
+
+        val readPermissionGranted = permissions[getReadPermission()] == true
+        val notificationPermissionGranted = permissions[getNotificationPermission()] == true
 
         if (readPermissionGranted) {
             Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-            viewModel.loadMusicFiles()
+            musicViewModel.loadMusicFiles()
         } else {
             Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -49,36 +48,28 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-
+        val backgroundColor = Color(0xFF191834)
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.dark(
+                scrim = backgroundColor.toArgb()
+            ),
+            navigationBarStyle = SystemBarStyle.dark(
+                scrim = backgroundColor.toArgb()
+            )
+        )
         checkPermissions()
 
         setContent {
             Music_PlayerTheme {
-
-                val backgroundColor = Color(0xFF191834)
-                // Set status bar color to match background
-                val systemUiController = rememberSystemUiController()
-
-                SideEffect {
-                    systemUiController.setStatusBarColor(
-                        color = backgroundColor,
-                        darkIcons = false
-                    )
-                }
-
-                MainApp(viewModel)
+                MainApp(musicViewModel, playlistViewModel)
             }
         }
     }
 
     private fun checkPermissions() {
         val readPermission = getReadPermission()
-        val permissions = mutableListOf(readPermission, Manifest.permission.RECORD_AUDIO)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            permissions.add(Manifest.permission.POST_NOTIFICATIONS)
-        }
+        val notificationPermission = getNotificationPermission()
+        val permissions = mutableListOf(readPermission, notificationPermission)
 
         val hasReadPermission = ContextCompat.checkSelfPermission(
             this, readPermission
@@ -86,18 +77,14 @@ class MainActivity : ComponentActivity() {
 
         val hasNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             ContextCompat.checkSelfPermission(
-                this, Manifest.permission.POST_NOTIFICATIONS
+                this, notificationPermission
             ) == PackageManager.PERMISSION_GRANTED
         } else true
 
-        val hasRecordAudioPermission = ContextCompat.checkSelfPermission(
-            this, Manifest.permission.RECORD_AUDIO
-        ) == PackageManager.PERMISSION_GRANTED
-
-        if (!hasReadPermission || !hasNotificationPermission || !hasRecordAudioPermission) {
+        if (!hasReadPermission || !hasNotificationPermission) {
             permissionLauncher.launch(permissions.toTypedArray())
         } else {
-            viewModel.loadMusicFiles()
+            musicViewModel.loadMusicFiles()
         }
     }
 
@@ -105,6 +92,14 @@ class MainActivity : ComponentActivity() {
         return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU)
             Manifest.permission.READ_MEDIA_AUDIO
         else Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+
+    private fun getNotificationPermission(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            Manifest.permission.POST_NOTIFICATIONS
+        } else {
+            ""
+        }
     }
 
 }

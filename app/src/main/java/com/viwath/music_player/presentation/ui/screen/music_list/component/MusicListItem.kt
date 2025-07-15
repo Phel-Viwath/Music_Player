@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.R
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 
 @Composable
 fun MusicListItem(

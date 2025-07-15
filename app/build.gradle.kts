@@ -1,3 +1,6 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -9,12 +12,12 @@ plugins {
 
 android {
     namespace = "com.viwath.music_player"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.viwath.music_player"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 1
         versionName = "1.0"
 
@@ -34,11 +37,16 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "17"
-    }
+
     buildFeatures {
         compose = true
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    compilerOptions{
+        jvmTarget.set(JvmTarget.JVM_17)
+        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
@@ -88,15 +96,12 @@ dependencies {
 
     // room database
     implementation(libs.androidx.room.runtime)
+    annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
 
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.material.icons.extended)
-
-    // For system UI controller
-    implementation(libs.accompanist.systemuicontroller)
-
 
 }
 

@@ -1,7 +1,7 @@
 package com.viwath.music_player.presentation.ui.screen.state
 
 import com.viwath.music_player.domain.model.FavoriteMusic
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 
 data class FavorMusicState(
     val idle: Boolean = false,

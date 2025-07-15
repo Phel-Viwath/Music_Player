@@ -38,20 +38,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.viwath.music_player.domain.model.MusicDto
-import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
+import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
+import com.viwath.music_player.presentation.ui.screen.playlist.PlaylistScreen
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
+    modifier: Modifier = Modifier,
     viewModel: MusicViewModel,
     onMusicListLoaded: (List<MusicDto>) -> Unit,
-    onMusicSelected: (MusicDto) -> Unit
+    onMusicSelected: (MusicDto) -> Unit,
+    onNavigateToPlaylistMusic: (PlaylistDto) -> Unit = {},
+    initialTab: Int = 0
 ){
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 1)
+    var selectedTab by remember { mutableIntStateOf(initialTab) }
+    val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = initialTab)
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(pagerState.currentPage) {
@@ -65,25 +69,21 @@ fun HomeScreen(
         }
     }
 
-    Box{
-        AmbientGradientBackground(
-            modifier = Modifier.fillMaxSize()
-        )
+    Box(modifier = modifier){
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
             TabBar(
+                modifier = Modifier.background(Color.Transparent),
                 selectedTabIndex = selectedTab,
                 onTabSelected = {
                     selectedTab = it
                     coroutineScope.launch {
                         pagerState.animateScrollToPage(it)
                     }
-                },
-                modifier = Modifier.padding(bottom = 16.dp)
-                    .background(Color.Transparent)
+                }
             )
 
             HorizontalPager(
@@ -93,12 +93,7 @@ fun HomeScreen(
                     .fillMaxHeight()
             ) { page ->
                 when(page) {
-                    0 -> Text(
-                        text = "Album Screen",
-                        color = Color.White,
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    1 -> MusicListScreen(
+                    0 -> MusicListScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .fillMaxHeight(),
@@ -110,10 +105,18 @@ fun HomeScreen(
                             onMusicSelected(selectedMusic)
                         }
                     )
-                    2 -> Text(
-                        text = "PlayList Screen",
+
+                    1 -> Text(
+                        text = "Album Screen",
                         color = Color.White,
                         modifier = Modifier.padding(16.dp)
+                    )
+
+                    2 -> PlaylistScreen(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(Color.Transparent),
+                        onNavigateToPlaylistMusic = onNavigateToPlaylistMusic
                     )
                 }
             }
@@ -129,8 +132,8 @@ private fun TabBar(
     modifier: Modifier = Modifier
 ) {
     val tabs = listOf(
-        TabItem("Album", Icons.Default.Album),
         TabItem("Music", Icons.Default.MusicNote),
+        TabItem("Album", Icons.Default.Album),
         TabItem("PlayList", Icons.AutoMirrored.Filled.List)
     )
 

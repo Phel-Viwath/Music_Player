@@ -29,7 +29,7 @@ import com.viwath.music_player.core.util.Constant.CHANNEL_ID
 import com.viwath.music_player.core.util.Constant.NOTIFICATION_ID
 import com.viwath.music_player.core.util.GetImage.getImageBitMap
 import com.viwath.music_player.domain.model.Music
-import com.viwath.music_player.domain.model.toMusicDto
+import com.viwath.music_player.domain.model.dto.toMusicDto
 import com.viwath.music_player.presentation.MainActivity
 import com.viwath.music_player.presentation.ui.screen.state.PlaybackState
 import dagger.hilt.android.AndroidEntryPoint

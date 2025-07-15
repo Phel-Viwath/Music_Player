@@ -1,4 +1,7 @@
-package com.viwath.music_player.domain.model
+package com.viwath.music_player.domain.model.dto
+
+import com.viwath.music_player.domain.model.FavoriteMusic
+import com.viwath.music_player.domain.model.Music
 
 data class MusicDto(
     val id: Long,
@@ -27,7 +30,7 @@ fun MusicDto.toMusic(): Music {
     )
 }
 
-fun MusicDto.toFavoriteMusic(): FavoriteMusic{
+fun MusicDto.toFavoriteMusic(): FavoriteMusic {
     return FavoriteMusic(
         id = id,
         title = title,

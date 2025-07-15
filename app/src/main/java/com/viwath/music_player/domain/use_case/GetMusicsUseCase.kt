@@ -4,7 +4,7 @@ import android.util.Log
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers

@@ -8,10 +8,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Resource
-import com.viwath.music_player.domain.model.Music
-import com.viwath.music_player.domain.model.MusicDto
+import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.SortOrder
-import com.viwath.music_player.domain.model.toMusic
+import com.viwath.music_player.domain.model.dto.toMusic
 import com.viwath.music_player.domain.use_case.GetMusicsUseCase
 import com.viwath.music_player.presentation.MusicPlayerManager
 import com.viwath.music_player.presentation.ui.screen.state.MusicState
@@ -34,8 +33,8 @@ class MusicViewModel @Inject constructor(
     private val _playbackState = MutableStateFlow(PlaybackState())
     val playbackState: StateFlow<PlaybackState> get() = _playbackState.asStateFlow()
 
-    private val _currentMusic = mutableStateOf<Music?>(null)
-    val currentMusic: State<Music?> get() = _currentMusic
+    private val _currentMusic = mutableStateOf<MusicDto?>(null)
+    val currentMusic: State<MusicDto?> get() = _currentMusic
 
     init {
         Log.d("MusicViewModel", "Init ViewModel: Called")
@@ -81,10 +80,10 @@ class MusicViewModel @Inject constructor(
         }
     }
     fun playMusic(musicDto: MusicDto, musics: List<MusicDto> = emptyList()) {
-        val music = musicDto.toMusic()
+        val music = musicDto
         val musics = musics.map { it.toMusic() }
         _currentMusic.value = music
-        musicPlayerManager.playMusic(music, musics)
+        musicPlayerManager.playMusic(music.toMusic(), musics)
     }
 
     fun pauseMusic() {

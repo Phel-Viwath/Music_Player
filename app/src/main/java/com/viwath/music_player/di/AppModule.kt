@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
-import com.viwath.music_player.data.data_source.FavoriteMusicDatabase
+import com.viwath.music_player.data.data_source.MusicDatabase
 import com.viwath.music_player.data.repository.MusicRepositoryImp
 import com.viwath.music_player.domain.repository.MusicRepository
 import com.viwath.music_player.domain.use_case.AddFavorUseCase
@@ -12,11 +12,16 @@ import com.viwath.music_player.domain.use_case.FavoriteUseCase
 import com.viwath.music_player.domain.use_case.GetFavorUseCase
 import com.viwath.music_player.domain.use_case.GetMusicsUseCase
 import com.viwath.music_player.domain.use_case.RemoveFavorUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.AddPlaylistSongUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.DeletePlaylistUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.GetAllPlaylistUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.GetPlaylistSongsUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.NewPlaylistUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.PlaylistUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.android.scopes.ServiceScoped
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -26,21 +31,23 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideFavoriteMusicDatabase(app: Application): FavoriteMusicDatabase {
+    fun provideFavoriteMusicDatabase(app: Application): MusicDatabase {
         return Room.databaseBuilder(
             app,
-            FavoriteMusicDatabase::class.java,
-            FavoriteMusicDatabase.DATABASE_NAME
-        ).build()
+            MusicDatabase::class.java,
+            MusicDatabase.DATABASE_NAME
+            )
+            //.addMigrations(MusicDatabase.MIGRATION_1_2)
+            .build()
     }
 
     @Provides
     @Singleton
     fun provideMusicRepository(
         @ApplicationContext context: Context,
-        db: FavoriteMusicDatabase
+        db: MusicDatabase,
     ): MusicRepository {
-        return MusicRepositoryImp(context, db.favoriteMusicDao)
+        return MusicRepositoryImp(context, db.favoriteMusicDao, db.playlistDao)
     }
 
     @Provides
@@ -67,5 +74,17 @@ object AppModule {
         removeFavorUseCase = RemoveFavorUseCase(repository),
         getFavorUseCase = GetFavorUseCase(repository)
     )
+
+    @Singleton
+    @Provides
+    fun providePlaylistUseCase(repository: MusicRepository): PlaylistUseCase{
+        return PlaylistUseCase(
+            newPlaylistUseCase = NewPlaylistUseCase(repository),
+            getPlaylistUseCase = GetAllPlaylistUseCase(repository),
+            deletePlaylistUseCase = DeletePlaylistUseCase(repository),
+            getPlaylist = GetPlaylistSongsUseCase(repository),
+            addPlaylistSongUseCase = AddPlaylistSongUseCase(repository)
+        )
+    }
 
 }

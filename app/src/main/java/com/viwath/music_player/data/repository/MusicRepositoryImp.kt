@@ -5,18 +5,22 @@ import android.os.Build
 import android.provider.MediaStore
 import com.viwath.music_player.core.util.GetImage.getImagePath
 import com.viwath.music_player.data.data_source.FavoriteMusicDao
+import com.viwath.music_player.data.data_source.PlaylistDao
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
+import com.viwath.music_player.domain.model.Playlist
+import com.viwath.music_player.domain.model.PlaylistSong
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 
 class MusicRepositoryImp(
     private val context: Context,
-    private val dao: FavoriteMusicDao
+    private val favoriteDao: FavoriteMusicDao,
+    private val playlistDao: PlaylistDao
 ) : MusicRepository{
 
     override suspend fun getMusicFiles(): List<Music> {
-        val musicFiles = mutableListOf<Music>()
+        val result = mutableListOf<Music>()
 
         val collection = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q)
             MediaStore.Audio.Media.getContentUri(MediaStore.VOLUME_EXTERNAL)
@@ -66,34 +70,67 @@ class MusicRepositoryImp(
                 val imagePath = data.getImagePath(context)
 
                 val music = Music(id, title, artist, album, duration, imagePath, data,trackNumber, dateCol)
-                musicFiles.add(music)
+                result.add(music)
             }
         }
-        return musicFiles
+        return result
     }
 
 
+    // Favorite
+
     override suspend fun addFavorite(music: FavoriteMusic) {
-        dao.addFavorite(music)
+        favoriteDao.addFavorite(music)
     }
 
     override suspend fun removeFavorite(music: FavoriteMusic) {
-        dao.removeFavorite(music)
+        favoriteDao.removeFavorite(music)
     }
 
     override fun getFavoriteMusic(): Flow<List<FavoriteMusic>> {
-        return dao.getFavoriteMusic()
+        return favoriteDao.getFavoriteMusic()
     }
 
     override fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>> {
-        return dao.getFavoriteMusicByDate()
+        return favoriteDao.getFavoriteMusicByDate()
     }
 
     override fun getFavoriteMusicByTitle(): Flow<List<FavoriteMusic>> {
-        return dao.getFavoriteMusicByTitle()
+        return favoriteDao.getFavoriteMusicByTitle()
     }
 
     override fun getFavoriteMusicByDuration():Flow<List<FavoriteMusic>> {
-        return dao.getFavoriteMusicByDuration()
+        return favoriteDao.getFavoriteMusicByDuration()
+    }
+
+    /// Playlist
+    override suspend fun newPlayList(playlist: Playlist) {
+        playlistDao.newPlaylist(playlist)
+    }
+
+    override suspend fun addMusicToPlaylist(playlistSongs: List<PlaylistSong>) {
+        playlistSongs.forEach {
+            playlistDao.addMusicToPlaylist(it)
+        }
+    }
+
+    override fun getPlaylists(): Flow<List<Playlist>> {
+        return playlistDao.getAllPlayList()
+    }
+
+    override fun getPlaylistSongs(playlistId: Long): Flow<List<PlaylistSong>> {
+        return playlistDao.getPlaylistSongs(playlistId)
+    }
+
+    override fun getAllPlaylistSongs(): Flow<List<PlaylistSong>> {
+        return playlistDao.getAllPlaylistSongs()
+    }
+
+    override suspend fun deletePlaylist(playlist: Playlist) {
+        playlistDao.deletePlaylist(playlist)
+    }
+
+    override suspend fun removePlaylistSong(playlistId: Long, musicId: String) {
+        playlistDao.removeFromPlaylist(playlistId, musicId)
     }
 }
