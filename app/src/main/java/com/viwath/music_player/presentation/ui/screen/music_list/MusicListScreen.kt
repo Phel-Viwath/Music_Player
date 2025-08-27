@@ -24,7 +24,6 @@ import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 fun MusicListScreen(
     modifier: Modifier = Modifier,
     viewModel: MusicViewModel = hiltViewModel(),
-    onMusicListLoaded: (List<MusicDto>) -> Unit = {},
     onMusicSelected: (MusicDto) -> Unit = {}
 ){
     val state = viewModel.state.value
@@ -34,13 +33,6 @@ fun MusicListScreen(
     LaunchedEffect(state.error) {
         if (state.error.isNotBlank())
             showDialog.value = true
-    }
-
-    // Notify parent about loaded music list
-    LaunchedEffect(state.musicFiles) {
-        if (state.musicFiles.isNotEmpty()) {
-            onMusicListLoaded(state.musicFiles)
-        }
     }
 
     Log.d("MusicListScreen", "MusicListScreen: ${state.musicFiles}")

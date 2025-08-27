@@ -1,5 +1,7 @@
 package com.viwath.music_player.presentation.ui.screen.playlist.component
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -7,14 +9,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.MusicNote
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,70 +33,69 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.PopupProperties
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.domain.model.dto.PlaylistDto
-import com.viwath.music_player.domain.model.dto.toPlaylist
+import com.viwath.music_player.presentation.ui.screen.Routes
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
+import com.viwath.music_player.presentation.ui.screen.music_list.ShowDialog
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistMusicScreen(
-    playlistDto: PlaylistDto,
     musicViewModel: MusicViewModel,
-    playlistViewModel: PlaylistViewModel = hiltViewModel(),
+    playlistViewModel: PlaylistViewModel,
     onMusicSelected: (MusicDto) -> Unit = {},
     onNavigateBack: () -> Unit,
-    onAddMusicClick:() -> Unit
+    navController: NavController
 ){
+    // view-model state
+    val state = playlistViewModel.state.value
 
+    val context = LocalContext.current
+    val playlist = remember (state.playlist) { state.playlist }
+    val musicList = remember(state.playlistSongs){ state.playlistSongs }
+
+    var showErrorDialog by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
-    var musicList by remember { mutableStateOf(emptyList<MusicDto>()) }
-    var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf("") }
 
     // load music
-    LaunchedEffect(playlistDto.playlistId){
-        playlistDto.playlistId?.let { playlistId ->
-            try {
-                isLoading = true
-                playlistViewModel.onEvent(PlaylistEvent.LoadPlaylistSong(playlistId))
-            }catch (e: Exception){
-                error = "Failed to load playlist music: ${e.message}"
-            }finally {
-                isLoading = false
-            }
-        }
-    }
-    val state = playlistViewModel.state.value
-    LaunchedEffect(state.playlistSongs){
-        musicList = state.playlistSongs
-        isLoading = false
-    }
-    LaunchedEffect(state.error) {
-        if (state.error.isNotBlank()) {
-            error = state.error
-            isLoading = false
+    LaunchedEffect(playlistViewModel){
+        try {
+            playlistViewModel.onEvent(PlaylistEvent.LoadPlaylist)
+            playlistViewModel.onEvent(PlaylistEvent.LoadPlaylistSong)
+        }catch (e: Exception){
+            error = "Failed to load playlist music: ${e.message}"
+            showErrorDialog = true
         }
     }
 
+    LaunchedEffect(state.error) {
+        if (state.error.isNotBlank()){
+            error = state.error
+            showErrorDialog = true
+        }
+    }
 
     val currentMusic = musicViewModel.currentMusic.value
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = playlistDto.name,
-                        color = Color.White
-                    )
+                    playlist?.let {
+                        Text(
+                            text = it.name,
+                            color = Color.White
+                        )
+                    }
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
@@ -117,10 +117,24 @@ fun PlaylistMusicScreen(
                     DropDownMenus(
                         isShowMenu = showMenu,
                         onRemovePlaylistClick = {
-                            playlistViewModel.onEvent(PlaylistEvent.DeletePlaylist(playlistDto.toPlaylist()))
+                            playlist?.let { playlist ->
+                                playlistViewModel.onEvent(PlaylistEvent.DeletePlaylist(playlist))
+                                playlistViewModel.onEvent(PlaylistEvent.OnDeletePlaylist)
+                            } ?: run {
+                                Toast.makeText(context, "Invalid Playlist ID!", Toast.LENGTH_SHORT).show()
+                            }
+                            Log.d("PlaylistMusicScreen", "PlaylistMusicScreen: $playlist")
                             onNavigateBack()
                         },
-                        onAddMusicClick = onAddMusicClick,
+                        onAddMusicClick = {
+                            playlist?.let { playlist ->
+                                navController.navigate(Routes.MusicPickerScreen.route + "/${playlist.playlistId}"){
+                                    launchSingleTop = true
+                                }
+                            } ?: run {
+                                Toast.makeText(context, "Invalid Playlist ID!", Toast.LENGTH_SHORT).show()
+                            }
+                        },
                         onDismiss = {
                             showMenu = false
                         }
@@ -136,66 +150,67 @@ fun PlaylistMusicScreen(
                 .padding(innerPadding)
                 .background(Color.Transparent)
         ){
-            if (isLoading) {
+            Log.d("UI", "PlaylistMusicScreen: ${musicList.isNotEmpty()}")
+            if (musicList.isEmpty()){
+                Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ){
+                    Icon(
+                        imageVector = Icons.Default.MusicNote,
+                        contentDescription = "Music note icon",
+                        modifier = Modifier.size(64.dp)
+                    )
+                    Text(
+                        text = "No Songs",
+                        fontSize = 16.sp,
+                        color = Color.Gray
+                    )
+                    TextButton(
+                        onClick = {
+                            playlist?.let { playlist ->
+                                navController.navigate(Routes.MusicPickerScreen.route + "/${playlist.playlistId}"){
+                                    launchSingleTop = true
+                                }
+                            } ?: run {
+                                Toast.makeText(context, "Invalid Playlist ID!", Toast.LENGTH_SHORT).show()
+                            }
+                        }
+                    ){
+                        Text("Add", color = Color(0xFF800080))
+                    }
+                }
+            }
+
+            if (state.isLoading) {
                 CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-            if (error.isNotBlank()) {
-                Column(
-                    modifier = Modifier.align(Alignment.Center),
-                    horizontalAlignment = Alignment.CenterHorizontally
+            if (showErrorDialog){
+                ShowDialog(
+                    title = "Error",
+                    message = error
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Warning,
-                        contentDescription = "Error",
-                        tint = Color.Red,
-                        modifier = Modifier.size(48.dp)
-                    )
-                    Text(
-                        text = error,
-                        color = Color.White,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    showErrorDialog = false
                 }
-            }
-            if (musicList.isNotEmpty()){
-                MusicList(
-                    modifier = Modifier.fillMaxSize(),
-                    musicList = musicList,
-                    currentMusic = null,
-                    onMusicSelected = { selectedMusic ->
-                        val isPlaying = currentMusic?.id == selectedMusic.id
-                        if (!isPlaying) {
-                            musicViewModel.playMusic(selectedMusic, musicList)
-                        }
-                        onMusicSelected(selectedMusic)
-                    }
-                )
             }
 
-            Column(
-                modifier = Modifier.align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ){
-                Icon(
-                    imageVector = Icons.Default.MusicNote,
-                    contentDescription = "Music note icon",
-                    modifier = Modifier.size(64.dp)
-                )
-                Text(
-                    text = "No Songs",
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-                TextButton(
-                    onClick = onAddMusicClick
-                ){
-                    Text("Add", color = Color(0xFF800080))
+            MusicList(
+                modifier = Modifier.fillMaxSize(),
+                musicList = musicList,
+                currentMusic = null,
+                onMusicSelected = { selectedMusic ->
+                    val isPlaying = currentMusic?.id == selectedMusic.id
+                    if (!isPlaying) {
+                        musicViewModel.playMusic(selectedMusic, musicList)
+                    }
+                    onMusicSelected(selectedMusic)
                 }
-            }
+            )
         }
+
     }
 }
 
@@ -212,19 +227,12 @@ fun DropDownMenus(
         properties = PopupProperties(focusable = false)
     ) {
         DropdownMenuItem(
-            text = { Text("Add Music") },
-            onClick = {
-                onAddMusicClick()
-                isShowMenu
-            }
+            text = { Text("Add Music", color = Color.White) },
+            onClick = onAddMusicClick
         )
         DropdownMenuItem(
-            text = { Text("Remove") },
-            onClick = {
-                onRemovePlaylistClick()
-                isShowMenu
-            }
+            text = { Text("Remove", color = Color.White) },
+            onClick = onRemovePlaylistClick
         )
-
     }
 }

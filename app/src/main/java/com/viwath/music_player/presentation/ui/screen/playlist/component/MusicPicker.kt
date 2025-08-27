@@ -1,5 +1,7 @@
 package com.viwath.music_player.presentation.ui.screen.playlist.component
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -38,23 +40,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.R
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
+import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
+import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MusicPicker(
     modifier: Modifier = Modifier,
-    musicList: List<MusicDto>,
-    onMusicSelected: (List<MusicDto>) -> Unit,
-    onNavigateBack: () -> Unit
+    musicViewModel: MusicViewModel = hiltViewModel(),
+    playlistViewModel: PlaylistViewModel,
+    navController: NavController
 ){
-
+    val musicList = musicViewModel.state.value.musicFiles
+    val context = LocalContext.current
     var selectedMusicIds by remember { mutableStateOf(setOf<String>()) }
     var isCheckAll by remember { mutableStateOf(false) }
 
@@ -65,9 +74,21 @@ fun MusicPicker(
         isCheckAll = checkCount == musicList.size && musicList.isNotEmpty()
     }
 
-    LaunchedEffect(selectedMusicList){
-        onMusicSelected(selectedMusicList)
+    val state = playlistViewModel.state.value
+    LaunchedEffect(state.success){
+        if (state.success.isNotEmpty()){
+            Toast.makeText(context, state.success, Toast.LENGTH_SHORT).show()
+            navController.popBackStack()
+        }
     }
+
+    LaunchedEffect(state.error){
+        if (state.error.isNotEmpty()){
+            Log.e("MusicPicker", "MusicPicker: ${state.error}")
+            Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     Scaffold(
         modifier = modifier.background(Color.Transparent),
@@ -80,7 +101,9 @@ fun MusicPicker(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
                         Icon(
                             imageVector = Icons.Default.Close,
                             contentDescription = "Back",
@@ -117,6 +140,7 @@ fun MusicPicker(
                         .clip(RoundedCornerShape(8.dp)),
                     onClick = {
                         /// save to playlist logic with viewModel
+                        playlistViewModel.onEvent(PlaylistEvent.AddPlaylistSong(selectedMusicList))
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (checkCount == 0) Color.Gray else Color(0xFF800080)

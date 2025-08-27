@@ -61,7 +61,7 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             Music_PlayerTheme {
-                MainApp(musicViewModel, playlistViewModel)
+                MainApp(musicViewModel)
             }
         }
     }

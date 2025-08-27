@@ -22,6 +22,12 @@ interface PlaylistDao {
     @Delete
     suspend fun deletePlaylist(playlist: Playlist)
 
+    @Query("SELECT * FROM playlist WHERE playlistId = :playlistId")
+    suspend fun getPlaylist(playlistId: Long): Playlist
+
+    @Query("UPDATE playlist SET thumbnail = :thumbnail WHERE playlistId = :playlistId")
+    suspend fun updateThumbnailUri(thumbnail: String, playlistId: Long): Int
+
     // playlist song
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addMusicToPlaylist(playlistSong: PlaylistSong)
@@ -34,6 +40,7 @@ interface PlaylistDao {
 
     @Query("SELECT * FROM playlist_song")
     fun getAllPlaylistSongs(): Flow<List<PlaylistSong>>
+
 
 
 }

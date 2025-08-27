@@ -20,6 +20,7 @@ interface MusicRepository {
     // playlist
     suspend fun newPlayList(playlist: Playlist)
     suspend fun addMusicToPlaylist(playlistSongs: List<PlaylistSong>)
+    suspend fun getPlaylist(playlistId: Long): Playlist
 
     fun getPlaylists(): Flow<List<Playlist>>
     fun getPlaylistSongs(playlistId: Long): Flow<List<PlaylistSong>>
@@ -27,6 +28,8 @@ interface MusicRepository {
 
     suspend fun deletePlaylist(playlist: Playlist)
     suspend fun removePlaylistSong(playlistId: Long, musicId: String)
+
+    suspend fun updatePlaylistThumbnail(playlistId: Long, thumbnailUri: String): Int
 
 
 }

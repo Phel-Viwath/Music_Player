@@ -25,12 +25,8 @@ import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,8 +34,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.domain.model.dto.PlaylistDto
+import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
 import com.viwath.music_player.presentation.ui.screen.playlist.PlaylistScreen
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
@@ -49,25 +46,13 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: MusicViewModel,
-    onMusicListLoaded: (List<MusicDto>) -> Unit,
     onMusicSelected: (MusicDto) -> Unit,
-    onNavigateToPlaylistMusic: (PlaylistDto) -> Unit = {},
+    navController: NavController,
     initialTab: Int = 0
 ){
-    var selectedTab by remember { mutableIntStateOf(initialTab) }
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = initialTab)
-    val coroutineScope = rememberCoroutineScope()
-
-    LaunchedEffect(pagerState.currentPage) {
-        selectedTab = pagerState.currentPage
-    }
-
-    // Sync selected tab with pager state
-    LaunchedEffect(selectedTab) {
-        if (pagerState.currentPage != selectedTab) {
-            pagerState.animateScrollToPage(selectedTab)
-        }
-    }
+    val scope = rememberCoroutineScope()
+    val selectedTab = pagerState.currentPage
 
     Box(modifier = modifier){
         Column(
@@ -79,8 +64,7 @@ fun HomeScreen(
                 modifier = Modifier.background(Color.Transparent),
                 selectedTabIndex = selectedTab,
                 onTabSelected = {
-                    selectedTab = it
-                    coroutineScope.launch {
+                    scope.launch {
                         pagerState.animateScrollToPage(it)
                     }
                 }
@@ -98,25 +82,18 @@ fun HomeScreen(
                             .fillMaxWidth()
                             .fillMaxHeight(),
                         viewModel = viewModel,
-                        onMusicListLoaded = { loadMusicList ->
-                            onMusicListLoaded(loadMusicList)
-                        },
                         onMusicSelected = { selectedMusic ->
                             onMusicSelected(selectedMusic)
                         }
                     )
 
-                    1 -> Text(
-                        text = "Album Screen",
-                        color = Color.White,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    1 -> AlbumScreen()
 
                     2 -> PlaylistScreen(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(Color.Transparent),
-                        onNavigateToPlaylistMusic = onNavigateToPlaylistMusic
+                        navController = navController
                     )
                 }
             }

@@ -113,6 +113,9 @@ class MusicRepositoryImp(
             playlistDao.addMusicToPlaylist(it)
         }
     }
+    override suspend fun getPlaylist(playlistId: Long): Playlist {
+        return playlistDao.getPlaylist(playlistId)
+    }
 
     override fun getPlaylists(): Flow<List<Playlist>> {
         return playlistDao.getAllPlayList()
@@ -132,5 +135,9 @@ class MusicRepositoryImp(
 
     override suspend fun removePlaylistSong(playlistId: Long, musicId: String) {
         playlistDao.removeFromPlaylist(playlistId, musicId)
+    }
+
+    override suspend fun updatePlaylistThumbnail(playlistId: Long, thumbnailUri: String): Int {
+        return playlistDao.updateThumbnailUri(thumbnailUri, playlistId)
     }
 }

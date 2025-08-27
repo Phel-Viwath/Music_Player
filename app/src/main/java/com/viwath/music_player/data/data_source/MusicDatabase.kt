@@ -2,15 +2,14 @@ package com.viwath.music_player.data.data_source
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
-import androidx.room.migration.Migration
-import androidx.sqlite.db.SupportSQLiteDatabase
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Playlist
 import com.viwath.music_player.domain.model.PlaylistSong
 
 @Database(
     entities = [FavoriteMusic::class, Playlist::class, PlaylistSong::class],
-    version = 2
+    version = 2,
+    exportSchema = true
 )
 abstract class MusicDatabase: RoomDatabase() {
 
@@ -42,7 +41,6 @@ abstract class MusicDatabase: RoomDatabase() {
 //                """.trimIndent())
 //            }
 //        }
-
 
     }
 

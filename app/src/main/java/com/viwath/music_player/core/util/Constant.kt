@@ -1,7 +1,7 @@
 package com.viwath.music_player.core.util
 
 object Constant {
-    const val PARAM_ID = "musicId"
+    const val PLAYLIST_ID = "playlistId"
 
     const val NOTIFICATION_ID = 1
     const val CHANNEL_ID = "music_playback_channel"

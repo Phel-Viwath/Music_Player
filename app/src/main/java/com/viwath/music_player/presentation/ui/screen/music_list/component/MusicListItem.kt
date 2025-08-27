@@ -1,5 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.music_list.component
 
+import android.util.Log
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -39,6 +40,7 @@ fun MusicListItem(
     onItemMenuClick: (MusicDto) -> Unit,
     isPlaying: Boolean = false
 ){
+    Log.d("MusicListItem", "MusicListItem image path is: ${music.imagePath}")
     val backgroundColor = if (isPlaying) Color(0xFF1DB954) else Color.Transparent
     Box(modifier = Modifier.background(backgroundColor)){
         Row(

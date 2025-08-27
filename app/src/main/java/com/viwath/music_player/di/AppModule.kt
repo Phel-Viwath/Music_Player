@@ -16,6 +16,7 @@ import com.viwath.music_player.domain.use_case.playlist_use_case.AddPlaylistSong
 import com.viwath.music_player.domain.use_case.playlist_use_case.DeletePlaylistUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.GetAllPlaylistUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.GetPlaylistSongsUseCase
+import com.viwath.music_player.domain.use_case.playlist_use_case.GetPlaylistUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.NewPlaylistUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.PlaylistUseCase
 import dagger.Module
@@ -80,10 +81,11 @@ object AppModule {
     fun providePlaylistUseCase(repository: MusicRepository): PlaylistUseCase{
         return PlaylistUseCase(
             newPlaylistUseCase = NewPlaylistUseCase(repository),
-            getPlaylistUseCase = GetAllPlaylistUseCase(repository),
+            getAllPlaylistUseCase = GetAllPlaylistUseCase(repository),
             deletePlaylistUseCase = DeletePlaylistUseCase(repository),
-            getPlaylist = GetPlaylistSongsUseCase(repository),
-            addPlaylistSongUseCase = AddPlaylistSongUseCase(repository)
+            getPlaylistSongUseCase = GetPlaylistSongsUseCase(repository),
+            addPlaylistSongUseCase = AddPlaylistSongUseCase(repository),
+            getPlaylistUseCase = GetPlaylistUseCase(repository)
         )
     }
 

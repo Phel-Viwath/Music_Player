@@ -5,9 +5,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
-    kotlin("kapt")
-    alias(libs.plugins.org.jetbrains.kotlin.kapt)
-    id("com.google.devtools.ksp")
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -41,12 +40,16 @@ android {
     buildFeatures {
         compose = true
     }
+
+    ksp {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }
 
 tasks.withType<KotlinCompile>().configureEach {
     compilerOptions{
         jvmTarget.set(JvmTarget.JVM_17)
-        freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
+        //freeCompilerArgs = listOf("-XXLanguage:+PropertyParamAnnotationDefaultTargetMode")
     }
 }
 
@@ -89,31 +92,18 @@ dependencies {
 
     //
     implementation(libs.dagger.hilt.android)
-    kapt(libs.dagger.hilt.compiler)
+    ksp(libs.dagger.hilt.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
     implementation(libs.androidx.palette.ktx)
 
     // room database
     implementation(libs.androidx.room.runtime)
-    annotationProcessor(libs.androidx.room.compiler)
     ksp(libs.androidx.room.compiler)
 
+    // image async
     implementation(libs.coil.compose)
 
     implementation(libs.androidx.material.icons.extended)
 
-}
-
-hilt {
-    enableAggregatingTask = true
-}
-
-kapt {
-    correctErrorTypes = true
-    includeCompileClasspath = false
-    arguments {
-        arg("kapt.kotlin.generated", "true")
-        arg("dagger.fastInit", "enabled")
-    }
 }

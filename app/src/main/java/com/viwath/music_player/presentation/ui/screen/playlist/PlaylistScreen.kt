@@ -1,10 +1,11 @@
 package com.viwath.music_player.presentation.ui.screen.playlist
 
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -29,8 +30,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.Playlist
-import com.viwath.music_player.domain.model.dto.PlaylistDto
+import com.viwath.music_player.presentation.ui.screen.Routes
 import com.viwath.music_player.presentation.ui.screen.component.Dialog
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.playlist.component.NewPlaylistDialogM3
@@ -41,7 +43,7 @@ import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 fun PlaylistScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaylistViewModel = hiltViewModel(),
-    onNavigateToPlaylistMusic: (PlaylistDto) -> Unit = {}
+    navController: NavController
 ){
 
     // properties
@@ -66,7 +68,8 @@ fun PlaylistScreen(
     // Layout
     Box(
         modifier = modifier
-            .fillMaxSize()
+            .fillMaxWidth()
+            .fillMaxHeight()
             .padding(12.dp)
     ){
         Column {
@@ -100,9 +103,12 @@ fun PlaylistScreen(
                     .padding(top = 8.dp)
             ) {
                 items(state.playlists, key = { "${it.playlistId}" }){ playlistItem ->
+                    Log.d("PlaylistScreen", "all playlist load: $playlistItem")
                     PlaylistItem(playlistItem){
                         // navigate to playlist music
-                        onNavigateToPlaylistMusic(playlistItem)
+                        navController.navigate(Routes.PlaylistMusicScreen.route + "/${playlistItem.playlistId}"){
+                            launchSingleTop = true
+                        }
                     }
                 }
             }

@@ -7,8 +7,8 @@ data class TabItem(
     val icon: ImageVector
 )
 
-object Routes {
-    const val HOME = "home"
-    const val PLAYLIST_MUSIC = "playlist_music"
-    const val MUSIC_PICKER = "music_picker"
+sealed class Routes(val route: String) {
+    data object HomeScreen: Routes("home")
+    data object PlaylistMusicScreen: Routes("playlist_music")
+    data object MusicPickerScreen: Routes("music_picker")
 }

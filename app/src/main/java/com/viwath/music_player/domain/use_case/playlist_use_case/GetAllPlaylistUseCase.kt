@@ -5,26 +5,26 @@ import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.domain.model.dto.toPlaylistDto
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.emptyFlow
 import javax.inject.Inject
 
 class GetAllPlaylistUseCase @Inject constructor(
     private val repository: MusicRepository
 ) {
-    operator fun invoke(): Flow<List<PlaylistDto>> = flow{
-        try {
+    operator fun invoke(): Flow<List<PlaylistDto>>{
+        return try {
             val allSongPlaylist = repository.getAllPlaylistSongs()
             val allPlaylist = repository.getPlaylists()
-            allPlaylist.collect { playlists ->
-                playlists.forEach { playlist ->
-                    val playlistSongs = allSongPlaylist.first().filter { it.playlistId == playlist.playlistId }
-                    val playlistDto = playlist.toPlaylistDto().copy(totalSong = playlistSongs.size)
-                    emit(listOf(playlistDto))
+            combine(allPlaylist, allSongPlaylist) { playlists, songs ->
+                playlists.map { playlist ->
+                    val playlistSongs = songs.filter { it.playlistId == playlist.playlistId }
+                    playlist.toPlaylistDto().copy(totalSong = playlistSongs.size)
                 }
             }
         }catch (e: Exception){
             Log.e("GetAllPlaylistUseCase", "invoke: ${e.message}")
+            emptyFlow()
         }
     }
 }
