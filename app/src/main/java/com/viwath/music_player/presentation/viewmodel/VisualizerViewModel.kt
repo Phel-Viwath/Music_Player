@@ -10,7 +10,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import androidx.media3.exoplayer.ExoPlayer
-import com.viwath.music_player.domain.model.AudioLevels
+import com.viwath.music_player.core.util.AudioLevels
 import com.viwath.music_player.domain.service.AudioVisualizer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay

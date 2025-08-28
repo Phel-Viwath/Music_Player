@@ -1,8 +1,10 @@
 package com.viwath.music_player.data.repository
 
+import android.content.ContentUris
 import android.content.Context
 import android.os.Build
 import android.provider.MediaStore
+import androidx.core.net.toUri
 import com.viwath.music_player.core.util.GetImage.getImagePath
 import com.viwath.music_player.data.data_source.FavoriteMusicDao
 import com.viwath.music_player.data.data_source.PlaylistDao
@@ -32,6 +34,7 @@ class MusicRepositoryImp(
             MediaStore.Audio.Media.TITLE,
             MediaStore.Audio.Media.ARTIST,
             MediaStore.Audio.Media.ALBUM,
+            MediaStore.Audio.Media.ALBUM_ID,
             MediaStore.Audio.Media.DURATION,
             MediaStore.Audio.Media.DATA,
             MediaStore.Audio.Media.TRACK,
@@ -52,6 +55,7 @@ class MusicRepositoryImp(
             val titleCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TITLE)
             val artistCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ARTIST)
             val albumCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM)
+            val albumIdCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.ALBUM_ID)
             val dataCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DATA)
             val durationCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.DURATION)
             val trackCol = cursor.getColumnIndexOrThrow(MediaStore.Audio.Media.TRACK)
@@ -62,6 +66,7 @@ class MusicRepositoryImp(
                 val title = cursor.getString(titleCol)
                 val artist = cursor.getString(artistCol)
                 val album = cursor.getString(albumCol)
+                val albumId = cursor.getLong(albumIdCol)
                 val data = cursor.getString(dataCol)
                 val duration = cursor.getLong(durationCol)
                 val trackNumber = cursor.getInt(trackCol)
@@ -69,7 +74,12 @@ class MusicRepositoryImp(
 
                 val imagePath = data.getImagePath(context)
 
-                val music = Music(id, title, artist, album, duration, imagePath, data,trackNumber, dateCol)
+                val albumArtUri = ContentUris.withAppendedId(
+                    "content://media/external/audio/albumart".toUri(),
+                    albumId
+                ).toString()
+
+                val music = Music(id, title, artist, album, albumId, albumArtUri, duration, imagePath, data,trackNumber, dateCol)
                 result.add(music)
             }
         }

@@ -5,7 +5,7 @@ import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.domain.model.SortOrder
+import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -47,6 +47,8 @@ class GetMusicsUseCase @Inject constructor(
                 title = music.title,
                 artist = music.artist,
                 album = music.album,
+                albumId = music.albumId,
+                albumArtUri = music.albumArtUri,
                 duration = music.duration,
                 imagePath = music.imagePath,
                 uri = music.uri,

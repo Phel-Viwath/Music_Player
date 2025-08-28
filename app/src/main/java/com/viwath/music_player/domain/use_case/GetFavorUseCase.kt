@@ -3,7 +3,7 @@ package com.viwath.music_player.domain.use_case
 import android.util.Log
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.FavoriteMusic
-import com.viwath.music_player.domain.model.SortOrder
+import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first

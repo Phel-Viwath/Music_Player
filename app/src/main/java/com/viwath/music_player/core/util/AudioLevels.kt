@@ -1,4 +1,4 @@
-package com.viwath.music_player.domain.model
+package com.viwath.music_player.core.util
 
 data class AudioLevels(
     val bass: Float = 0f,

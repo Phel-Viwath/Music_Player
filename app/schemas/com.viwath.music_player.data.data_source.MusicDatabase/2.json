@@ -2,11 +2,11 @@
   "formatVersion": 1,
   "database": {
     "version": 2,
-    "identityHash": "d6fff902beaa1156863ed6aa81f383e6",
+    "identityHash": "24c0b8378385a4b902763e9c04fb66f9",
     "entities": [
       {
         "tableName": "favorite_music",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `artist` TEXT NOT NULL, `album` TEXT NOT NULL, `duration` INTEGER NOT NULL, `imagePath` TEXT, `uri` TEXT NOT NULL, `trackNumber` INTEGER NOT NULL, `addDate` TEXT NOT NULL, PRIMARY KEY(`id`))",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER NOT NULL, `title` TEXT NOT NULL, `artist` TEXT NOT NULL, `album` TEXT NOT NULL, `albumId` INTEGER NOT NULL, `albumArtUri` TEXT, `duration` INTEGER NOT NULL, `imagePath` TEXT, `uri` TEXT NOT NULL, `trackNumber` INTEGER NOT NULL, `addDate` TEXT NOT NULL, PRIMARY KEY(`id`))",
         "fields": [
           {
             "fieldPath": "id",
@@ -31,6 +31,17 @@
             "columnName": "album",
             "affinity": "TEXT",
             "notNull": true
+          },
+          {
+            "fieldPath": "albumId",
+            "columnName": "albumId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "albumArtUri",
+            "columnName": "albumArtUri",
+            "affinity": "TEXT"
           },
           {
             "fieldPath": "duration",
@@ -150,7 +161,7 @@
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd6fff902beaa1156863ed6aa81f383e6')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '24c0b8378385a4b902763e9c04fb66f9')"
     ]
   }
 }

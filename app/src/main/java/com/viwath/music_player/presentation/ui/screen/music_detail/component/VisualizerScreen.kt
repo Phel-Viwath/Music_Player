@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.viwath.music_player.domain.model.AudioLevels
+import com.viwath.music_player.core.util.AudioLevels
 import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import kotlin.math.PI
 import kotlin.math.abs

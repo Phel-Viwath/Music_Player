@@ -5,7 +5,7 @@ import android.media.audiofx.Visualizer
 import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
-import com.viwath.music_player.domain.model.AudioLevels
+import com.viwath.music_player.core.util.AudioLevels
 import kotlin.math.log10
 import kotlin.math.sqrt
 
