@@ -48,11 +48,9 @@ class GetMusicsUseCase @Inject constructor(
                 artist = music.artist,
                 album = music.album,
                 albumId = music.albumId,
-                albumArtUri = music.albumArtUri,
                 duration = music.duration,
                 imagePath = music.imagePath,
                 uri = music.uri,
-                trackNumber = music.trackNumber,
                 addDate = music.addDate,
                 isFavorite = music.id in favoriteIds
             )

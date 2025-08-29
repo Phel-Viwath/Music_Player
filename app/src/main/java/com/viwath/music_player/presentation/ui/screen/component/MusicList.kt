@@ -29,8 +29,7 @@ fun MusicList(
             items(
                 items = musicList,
                 key = {music -> music.id }
-            ) {
-                music ->
+            ) { music ->
                 val isPlaying = currentMusic?.id == music.id
                 MusicListItem(
                     music = music,

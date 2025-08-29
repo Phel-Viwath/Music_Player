@@ -4,5 +4,6 @@ data class Album(
     val albumId: Long,
     val albumName: String,
     val albumArtUri: String? = null,
-    val totalSong: Int? = 0
+    val artist: String? = null,
+    val songCount: Int? = 0,
 )

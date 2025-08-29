@@ -10,6 +10,7 @@ import com.viwath.music_player.core.util.Constant
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.PlaylistSong
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.domain.use_case.ClearCacheUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.PlaylistUseCase
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.state.PlaylistState
@@ -21,16 +22,27 @@ import javax.inject.Inject
 @HiltViewModel
 class PlaylistViewModel @Inject constructor(
     private val useCase: PlaylistUseCase,
+    private val clearCacheUseCase: ClearCacheUseCase,
     private val savedStateHandle: SavedStateHandle
 ): ViewModel(){
 
     private val _state = mutableStateOf(PlaylistState())
     val state : State<PlaylistState> get() = _state
 
+    private val _currentMusic = mutableStateOf<MusicDto?>(null)
+    val currentMusic: State<MusicDto?> get() = _currentMusic
+
     init {
         viewModelScope.launch {
             val playlistDeferred = async { loadPlaylists() }
             playlistDeferred.await()
+        }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            clearCacheUseCase()
         }
     }
 

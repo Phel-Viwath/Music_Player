@@ -8,7 +8,7 @@ import jakarta.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class GetAlbumUseCase @Inject constructor(
+class GetAlbumMusicUseCase @Inject constructor(
     private val repository: MusicRepository
 ) {
     operator fun invoke(albumId: Long): Flow<Resource<List<MusicDto>>> = flow {
@@ -18,10 +18,10 @@ class GetAlbumUseCase @Inject constructor(
             return@flow
         }
         try {
-            val musicFiles = repository.getMusicFiles()
-            val album = musicFiles.filter { it.albumId == albumId }
-                .map { music -> music.toMusicDto() }
-            emit(Resource.Success(album))
+            val musicFiles = repository.getSongByAlbumId(albumId).map {
+                it.toMusicDto()
+            }
+            emit(Resource.Success(musicFiles))
         }catch (e: Exception){
             emit(Resource.Error(e.message ?: "Unknown error"))
         }

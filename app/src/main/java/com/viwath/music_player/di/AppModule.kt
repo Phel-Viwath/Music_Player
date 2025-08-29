@@ -8,12 +8,13 @@ import com.viwath.music_player.data.data_source.MusicDatabase
 import com.viwath.music_player.data.repository.MusicRepositoryImp
 import com.viwath.music_player.domain.repository.MusicRepository
 import com.viwath.music_player.domain.use_case.AddFavorUseCase
+import com.viwath.music_player.domain.use_case.ClearCacheUseCase
 import com.viwath.music_player.domain.use_case.FavoriteUseCase
 import com.viwath.music_player.domain.use_case.GetFavorUseCase
 import com.viwath.music_player.domain.use_case.GetMusicsUseCase
 import com.viwath.music_player.domain.use_case.RemoveFavorUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.AlbumUseCase
-import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumUseCase
+import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumMusicUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumsUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.AddPlaylistSongUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.DeletePlaylistUseCase
@@ -96,7 +97,10 @@ object AppModule {
     @Provides
     fun provideAlbumUseCase(repository: MusicRepository): AlbumUseCase = AlbumUseCase(
         GetAlbumsUseCase(repository),
-        GetAlbumUseCase(repository)
+        GetAlbumMusicUseCase(repository)
     )
 
+    @Provides
+    @Singleton
+    fun provideClearCacheUseCase(repository: MusicRepository): ClearCacheUseCase = ClearCacheUseCase(repository)
 }

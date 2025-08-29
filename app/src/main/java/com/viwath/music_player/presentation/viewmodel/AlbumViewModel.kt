@@ -1,10 +1,13 @@
 package com.viwath.music_player.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Resource
+import com.viwath.music_player.domain.use_case.ClearCacheUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.AlbumUseCase
 import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
 import com.viwath.music_player.presentation.ui.screen.state.AlbumState
@@ -15,7 +18,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AlbumViewModel @Inject constructor(
-    private val useCase: AlbumUseCase
+    private val useCase: AlbumUseCase,
+    private val clearCacheUseCase: ClearCacheUseCase,
+    private val savedStateHandle: SavedStateHandle
 ): ViewModel(){
 
     private val _state = mutableStateOf(AlbumState())
@@ -28,13 +33,20 @@ class AlbumViewModel @Inject constructor(
         }
     }
 
+    override fun onCleared() {
+        super.onCleared()
+        viewModelScope.launch {
+            clearCacheUseCase()
+        }
+    }
+
     fun onEvent(event: AlbumScreenEvent){
         when(event){
             is AlbumScreenEvent.GetAlbums -> {
                 loadAlbums()
             }
             is AlbumScreenEvent.GetAlbum -> {
-                loadAlbum(event.albumId)
+                loadAlbum()
             }
         }
     }
@@ -43,19 +55,37 @@ class AlbumViewModel @Inject constructor(
     private fun loadAlbums(){
         viewModelScope.launch {
             useCase.getAlbumsUseCase().collect{
-                _state.value = _state.value.copy(
-                    albums = it
-                )
+                when(it){
+                    is Resource.Success -> {
+                        _state.value = _state.value.copy(isLoading = false, albums = it.data ?: emptyList())
+                    }
+                    is Resource.Error -> {
+                        _state.value = _state.value.copy(isLoading = false, error = it.message ?: "")
+                    }
+                    is Resource.Loading -> {
+                        _state.value = _state.value.copy(isLoading = true)
+                    }
+                }
             }
         }
     }
 
-    private fun loadAlbum(albumId: Long){
+    private fun loadAlbum(){
+        var albumId: Long? = 0L
+        savedStateHandle.get<String>("albumId")?.let {
+            Log.d("AlbumViewModel", "loadAlbum id: $it")
+            albumId = it.toLong()
+        }
+        Log.d("AlbumViewModel", "loadAlbum: $albumId")
+        if (albumId == null || albumId == 0L){
+            _state.value = _state.value.copy(error = "Album id is null", isLoading = false)
+            return
+        }
         viewModelScope.launch {
-            useCase.getAlbumUseCase(albumId = albumId).collect { resource ->
+            useCase.getAlbumMusicUseCase(albumId = albumId).collect { resource ->
                 when(resource){
                     is Resource.Success -> {
-                        _state.value = _state.value.copy(isLoading = false, music = resource.data ?: emptyList())
+                        _state.value = _state.value.copy(isLoading = false, musics = resource.data ?: emptyList())
                     }
                     is Resource.Error -> {
                         _state.value = _state.value.copy(isLoading = false, error = resource.message ?: "")

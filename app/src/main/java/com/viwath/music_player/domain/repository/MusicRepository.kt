@@ -1,5 +1,6 @@
 package com.viwath.music_player.domain.repository
 
+import com.viwath.music_player.domain.model.Album
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.Playlist
@@ -8,7 +9,11 @@ import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
     suspend fun getMusicFiles(): List<Music>
+    suspend fun getAlbums(): List<Album>
 
+    suspend fun getSongByAlbumId(albumId: Long): List<Music>
+
+    suspend fun clearCache()
     // favorite
     suspend fun addFavorite(music: FavoriteMusic)
     suspend fun removeFavorite(music: FavoriteMusic)

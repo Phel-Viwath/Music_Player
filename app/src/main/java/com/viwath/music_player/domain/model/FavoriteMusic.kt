@@ -10,11 +10,9 @@ data class FavoriteMusic(
     val artist: String,
     val album: String,
     val albumId: Long,
-    val albumArtUri: String?,
     val duration: Long,
     val imagePath: String?,
     val uri: String,
-    val trackNumber: Int,
     val addDate: String
 )
 
@@ -25,11 +23,9 @@ fun Music.toFavoriteMusic(): FavoriteMusic {
         artist = artist,
         album = album,
         albumId = albumId,
-        albumArtUri = albumArtUri,
         duration = duration,
         imagePath = imagePath,
         uri = uri,
-        trackNumber = trackNumber,
         addDate = addDate
     )
 }
@@ -41,11 +37,9 @@ fun FavoriteMusic.toMusic(): Music {
         artist = artist,
         album = album,
         albumId = albumId,
-        albumArtUri = albumArtUri,
         duration = duration,
         imagePath = imagePath,
         uri = uri,
-        trackNumber = trackNumber,
         addDate = addDate
     )
 }

@@ -1,5 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.album_list
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -31,9 +32,11 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.viwath.music_player.domain.model.Album
+import com.viwath.music_player.presentation.ui.screen.Routes
 import com.viwath.music_player.presentation.ui.screen.component.Dialog
 import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
@@ -42,7 +45,8 @@ import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 @Composable
 fun AlbumScreen(
     modifier: Modifier = Modifier,
-    albumViewModel: AlbumViewModel = hiltViewModel()
+    albumViewModel: AlbumViewModel = hiltViewModel(),
+    navController: NavController,
 ){
 
     // properties
@@ -58,6 +62,10 @@ fun AlbumScreen(
         }
     }
 
+    state.albums.forEach {
+        Log.d("AlbumScreen", "all albums: $it")
+    }
+
     // Layout
     LazyVerticalGrid(
         columns = gridCells,
@@ -71,7 +79,11 @@ fun AlbumScreen(
             key = {index -> state.albums[index].albumId}
         ){ index ->
             AlbumItem(state.albums[index]){ albumId ->
-                albumViewModel.onEvent(AlbumScreenEvent.GetAlbum(albumId))
+                Log.d("AlbumScreen", "Album Id is: $albumId")
+                navController.navigate(Routes.AlbumDetailScreen.route + "/${albumId}"){
+                    launchSingleTop = true
+                }
+                albumViewModel.onEvent(AlbumScreenEvent.GetAlbum)
             }
         }
     }// end grid
@@ -153,7 +165,7 @@ fun AlbumItem(
         )
         // total song
         Text(
-            text = if (album.totalSong == 1) "${album.totalSong} Song" else "${album.totalSong} Songs",
+            text = if (album.songCount == 1) "${album.songCount} Song" else "${album.songCount} Songs",
             maxLines = 1,
             fontSize = 12.sp,
             color = Color.Gray

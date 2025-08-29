@@ -87,7 +87,9 @@ fun HomeScreen(
                         }
                     )
 
-                    1 -> AlbumScreen()
+                    1 -> AlbumScreen(
+                        navController = navController
+                    )
 
                     2 -> PlaylistScreen(
                         modifier = Modifier

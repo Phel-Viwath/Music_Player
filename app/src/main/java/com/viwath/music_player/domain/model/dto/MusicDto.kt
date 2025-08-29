@@ -9,11 +9,9 @@ data class MusicDto(
     val artist: String,
     val album: String,
     val albumId: Long,
-    val albumArtUri: String?,
     val duration: Long,
     val imagePath: String?, // use to get image
     val uri: String,
-    val trackNumber: Int,
     val addDate: String,
     val isFavorite: Boolean = false
 )
@@ -25,11 +23,9 @@ fun MusicDto.toMusic(): Music {
         artist = artist,
         album = album,
         albumId = albumId,
-        albumArtUri = albumArtUri,
         duration = duration,
         imagePath = imagePath,
         uri = uri,
-        trackNumber = trackNumber,
         addDate = addDate
     )
 }
@@ -41,11 +37,9 @@ fun MusicDto.toFavoriteMusic(): FavoriteMusic {
         artist = artist,
         album = album,
         albumId = albumId,
-        albumArtUri = albumArtUri,
         duration = duration,
         imagePath = imagePath,
         uri = uri,
-        trackNumber = trackNumber,
         addDate = addDate
     )
 }
@@ -57,11 +51,9 @@ fun Music.toMusicDto(): MusicDto{
         artist = artist,
         album = album,
         albumId = albumId,
-        albumArtUri = albumArtUri,
         duration = duration,
         imagePath = imagePath,
         uri = uri,
-        trackNumber = trackNumber,
         addDate = addDate
     )
 }

@@ -18,6 +18,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
@@ -46,7 +47,6 @@ fun MainApp(
                 Column {
                     if (!showMusicDetail && currentMusic != null){
                         MiniPlayer(
-                            music = currentMusic!!,
                             musicViewModel = musicViewModel,
                             onTap = { showMusicDetail = true }
                         )
@@ -101,6 +101,13 @@ fun MainApp(
                     modifier = Modifier,
                     playlistViewModel = playlistViewModel,
                     navController = navController
+                )
+            }
+            composable(
+                Routes.AlbumDetailScreen.route + "/{albumId}"
+            ) {
+                AlbumDetailScreen(
+                    navController = navController,
                 )
             }
         }
