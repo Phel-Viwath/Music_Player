@@ -78,7 +78,7 @@ class AlbumViewModel @Inject constructor(
         }
         Log.d("AlbumViewModel", "loadAlbum: $albumId")
         if (albumId == null || albumId == 0L){
-            _state.value = _state.value.copy(error = "Album id is null", isLoading = false)
+            _state.value = _state.value.copy(albumDetailError = "Album id is null", isLoading = false)
             return
         }
         viewModelScope.launch {
@@ -88,7 +88,7 @@ class AlbumViewModel @Inject constructor(
                         _state.value = _state.value.copy(isLoading = false, musics = resource.data ?: emptyList())
                     }
                     is Resource.Error -> {
-                        _state.value = _state.value.copy(isLoading = false, error = resource.message ?: "")
+                        _state.value = _state.value.copy(isLoading = false, albumDetailError = resource.message ?: "")
                     }
                     is Resource.Loading -> {
                         _state.value = _state.value.copy(isLoading = true)

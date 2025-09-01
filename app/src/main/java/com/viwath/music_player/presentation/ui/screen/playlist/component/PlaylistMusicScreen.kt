@@ -26,6 +26,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -47,6 +48,28 @@ import com.viwath.music_player.presentation.ui.screen.music_list.ShowDialog
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
+/**
+ * A composable function that displays the screen for a specific music playlist.
+ *
+ * This screen shows a list of songs within a selected playlist. It features a top app bar
+ * displaying the playlist's name, a back button for navigation, and a "more" menu with options
+ * to add more music or delete the entire playlist.
+ *
+ * The main content area either displays the list of songs or a message indicating that the
+ * playlist is empty, with a button to add new songs. The screen handles loading states and
+ * displays a progress indicator while fetching data. It also manages and displays error dialogs
+ * if any issues occur during data fetching or playlist operations.
+ *
+ * When a song from the list is tapped, it is played via the `musicViewModel` and the UI navigates
+ * to the music player screen.
+ *
+ * @param musicViewModel The view model for managing music playback and state.
+ * @param playlistViewModel The view model for managing playlist data and state.
+ * @param onMusicSelected A callback function invoked when a song is selected, typically used to
+ *                        trigger navigation to the player screen.
+ * @param onNavigateBack A callback function to handle back navigation.
+ * @param navController The NavController for navigating to other screens, such as the `MusicPickerScreen`.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PlaylistMusicScreen(
@@ -58,10 +81,12 @@ fun PlaylistMusicScreen(
 ){
     // view-model state
     val state = playlistViewModel.state.value
+    val currentMusic = musicViewModel.playbackState.collectAsState().value.currentMusic
 
     val context = LocalContext.current
     val playlist = remember (state.playlist) { state.playlist }
     val musicList = remember(state.playlistSongs){ state.playlistSongs }
+
 
     var showErrorDialog by remember { mutableStateOf(false) }
     var showMenu by remember { mutableStateOf(false) }
@@ -85,7 +110,6 @@ fun PlaylistMusicScreen(
         }
     }
 
-    val currentMusic = musicViewModel.currentMusic.value
     Scaffold(
         topBar = {
             TopAppBar(
@@ -200,7 +224,7 @@ fun PlaylistMusicScreen(
             MusicList(
                 modifier = Modifier.fillMaxSize(),
                 musicList = musicList,
-                currentMusic = null,
+                currentMusic = currentMusic,
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {

@@ -23,6 +23,7 @@ import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientB
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistMusicScreen
+import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
@@ -30,6 +31,19 @@ import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 * Bottom navigation has removed
 * */
 
+/**
+ * The main entry point and container for the application's UI.
+ * This composable function sets up the overall screen structure, including navigation,
+ * a persistent mini-player, and the main content area.
+ *
+ * It manages the navigation flow between different screens like the home screen,
+ * playlist details, album details, and a music picker. It also handles the state
+ * for the currently playing music and the visibility of the full-screen music player.
+ *
+ * @param musicViewModel The [MusicViewModel] instance used for controlling music playback
+ * and accessing music-related data. It is passed down to child composables that
+ * need to interact with the music player.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainApp(
@@ -86,13 +100,14 @@ fun MainApp(
                         homeInitialTab = 2
                         navController.popBackStack()
                     },
-                    onMusicSelected = {
-                        currentMusic = it
+                    onMusicSelected = { selectedMusic ->
+                        currentMusic = selectedMusic
                         showMusicDetail = true
                     },
                     navController = navController
                 )
             }
+
             composable(
                 Routes.MusicPickerScreen.route + "/{playlistId}",
             ){ backStackEntry ->
@@ -103,11 +118,18 @@ fun MainApp(
                     navController = navController
                 )
             }
+
             composable(
                 Routes.AlbumDetailScreen.route + "/{albumId}"
             ) {
+                val albumViewModel: AlbumViewModel = hiltViewModel()
                 AlbumDetailScreen(
                     navController = navController,
+                    viewModel = albumViewModel,
+                    onMusicSelected = { selectedMusic ->
+                        currentMusic = selectedMusic
+                        showMusicDetail = true
+                    }
                 )
             }
         }

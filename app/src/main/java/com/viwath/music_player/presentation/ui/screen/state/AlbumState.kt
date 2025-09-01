@@ -7,5 +7,6 @@ data class AlbumState(
     val albums: List<Album> = emptyList(),
     val musics: List<MusicDto> = emptyList(),
     val isLoading: Boolean = false,
-    val error: String = ""
+    val error: String = "",
+    val albumDetailError: String = ""
 )

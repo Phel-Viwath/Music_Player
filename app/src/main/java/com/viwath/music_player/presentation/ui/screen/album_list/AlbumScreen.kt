@@ -83,7 +83,6 @@ fun AlbumScreen(
                 navController.navigate(Routes.AlbumDetailScreen.route + "/${albumId}"){
                     launchSingleTop = true
                 }
-                albumViewModel.onEvent(AlbumScreenEvent.GetAlbum)
             }
         }
     }// end grid
