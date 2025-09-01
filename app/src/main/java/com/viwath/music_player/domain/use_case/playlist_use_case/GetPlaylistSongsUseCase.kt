@@ -30,6 +30,7 @@ class GetPlaylistSongsUseCase @Inject constructor(
                 emit(Resource.Success(musicDtoList))
             }
         }catch (e: Exception){
+            Log.e("GetPlaylistSongsUseCase", "invoke error:", e)
             emit(Resource.Error(e.message ?: "Unknown error"))
         }
 

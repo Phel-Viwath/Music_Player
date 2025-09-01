@@ -2,6 +2,7 @@ package com.viwath.music_player.domain.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.viwath.music_player.domain.model.dto.MusicDto
 
 @Entity(tableName = "favorite_music")
 data class FavoriteMusic(
@@ -43,3 +44,15 @@ fun FavoriteMusic.toMusic(): Music {
         addDate = addDate
     )
 }
+
+fun FavoriteMusic.toMusicDto(): MusicDto  = MusicDto(
+    id = id,
+    title = title,
+    artist = artist,
+    album = album,
+    albumId = albumId,
+    duration = duration,
+    imagePath = imagePath,
+    uri = uri,
+    addDate = addDate
+)

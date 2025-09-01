@@ -8,9 +8,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Constant
 import com.viwath.music_player.core.util.Resource
+import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.model.PlaylistSong
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.domain.use_case.ClearCacheUseCase
+import com.viwath.music_player.domain.use_case.FavoriteUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.PlaylistUseCase
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.state.PlaylistState
@@ -23,7 +26,8 @@ import javax.inject.Inject
 class PlaylistViewModel @Inject constructor(
     private val useCase: PlaylistUseCase,
     private val clearCacheUseCase: ClearCacheUseCase,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val favoriteUseCase: FavoriteUseCase
 ): ViewModel(){
 
     private val _state = mutableStateOf(PlaylistState())
@@ -59,14 +63,29 @@ class PlaylistViewModel @Inject constructor(
                 _state.value = _state.value.copy(playlist = event.playlist)
             }
             is PlaylistEvent.AddPlaylistSong -> addPlaylistSong(event.musicList)
+            is PlaylistEvent.SortPlaylistSong -> {
+                _state.value = _state.value.copy(sortOrder = event.sortOrder)
+            }
         }
     }
 
     fun loadPlaylists(){
+        val sortOrder = _state.value.sortOrder
         viewModelScope.launch {
-            useCase.getAllPlaylistUseCase().collect {
+            val favoriteMusicCount = getAllFavoriteMusic(sortOrder).size
+            Log.d("PlaylistViewModel", "loadPlaylists: $favoriteMusicCount")
+            val favoritePlaylist = PlaylistDto(
+                playlistId = 0L,
+                name = "Favorite",
+                createAt = System.currentTimeMillis(),
+                thumbnail = null,
+                totalSong = favoriteMusicCount
+            )
+            useCase.getAllPlaylistUseCase().collect { playlistDtos ->
+                val playlist = playlistDtos.toMutableList()
+                playlist.add(0, favoritePlaylist)
                 _state.value = _state.value.copy(
-                    playlists = it
+                    playlists = playlist
                 )
             }
         }
@@ -129,7 +148,7 @@ class PlaylistViewModel @Inject constructor(
             Log.d("PlaylistViewModel", "playlistId:$id")
             playlistId = id.toLong()
         }
-        if (playlistId == 0L || playlistId == null){
+        if (playlistId == null){
             _state.value = _state.value.copy(
                 error = "Invalid playlist ID",
                 isLoading = false
@@ -137,7 +156,14 @@ class PlaylistViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            Log.d("PlaylistViewModel", "loadPlaylistSong: in viewmodel scope")
+            if (playlistId == 0L){
+                val favoriteSong = getAllFavoriteMusic(_state.value.sortOrder)
+                _state.value = _state.value.copy(
+                    playlistSongs = favoriteSong,
+                    isLoading = false
+                )
+                return@launch
+            }
             useCase.getPlaylistSongUseCase(playlistId).collect { result ->
                 Log.d("PlaylistViewModel", "loadPlaylistSong: $result")
                 when(result){
@@ -149,6 +175,7 @@ class PlaylistViewModel @Inject constructor(
                         )
                     }
                     is Resource.Error<*> -> {
+                        Log.e("PlaylistViewModel", "loadPlaylistSong error: ${result.message}")
                         _state.value = _state.value.copy(
                             error = result.message ?: "Unknown error",
                             isLoading = false
@@ -201,27 +228,51 @@ class PlaylistViewModel @Inject constructor(
     }
 
     private fun loadPlaylist(){
-        savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.let {
-            viewModelScope.launch {
-                useCase.getPlaylistUseCase(it.toLong()).collect { result ->
-                    when(result){
-                        is Resource.Loading -> { _state.value = _state.value.copy(isLoading = true) }
-                        is Resource.Success -> {
-                            _state.value = _state.value.copy(
-                                playlist = result.data,
-                                isLoading = false
-                            )
-                        }
-                        is Resource.Error<*> -> {
-                            _state.value = _state.value.copy(
-                                error = result.message ?: "Unknown error",
-                                isLoading = false
-                            )
-                        }
+        val id = savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.toLong()
+        if (id == null){
+            _state.value = _state.value.copy(error = "Invalid playlist ID")
+            return
+        }
+        viewModelScope.launch {
+            if (id == 0L){
+                return@launch
+            }
+            useCase.getPlaylistUseCase(id).collect { result ->
+                when(result){
+                    is Resource.Loading -> { _state.value = _state.value.copy(isLoading = true) }
+                    is Resource.Success -> {
+                        _state.value = _state.value.copy(
+                            playlist = result.data,
+                            isLoading = false
+                        )
+                    }
+                    is Resource.Error<*> -> {
+                        Log.e("PlaylistViewModel", "loadPlaylist: ${result.message}")
+                        _state.value = _state.value.copy(
+                            error = result.message ?: "Unknown error",
+                            isLoading = false
+                        )
                     }
                 }
             }
         }
+    }
+
+    private suspend fun getAllFavoriteMusic(sortOrder: SortOrder): List<MusicDto> {
+        val favoriteMusic = mutableListOf<MusicDto>()
+        favoriteUseCase.getFavorUseCase(sortOrder).collect { result ->
+            when(result){
+                is Resource.Error -> {
+                    Log.e("PlaylistViewModel", "getAllFavoriteMusic: ${result.message}")
+                    _state.value = _state.value.copy(error = result.message ?: "Unknown error")
+                }
+                is Resource.Loading -> {}
+                is Resource.Success -> {
+                    favoriteMusic.addAll(result.data ?: emptyList())
+                }
+            }
+        }
+        return favoriteMusic
     }
 
 

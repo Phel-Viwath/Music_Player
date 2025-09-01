@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -44,8 +45,10 @@ fun PlaylistItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ){
+
         MusicFolderIcon(
-            imageUri = playlistItem.thumbnail
+            imageUri = playlistItem.thumbnail,
+            name = playlistItem.name
         )
 
         Column(
@@ -75,6 +78,7 @@ fun MusicFolderIcon(
     imageUri: String?,
     modifier: Modifier = Modifier,
     size: Dp = 64.dp,
+    name: String? = null
 ) {
     Box(modifier = modifier.size(size).background(Color.Transparent)){
         Box(
@@ -92,23 +96,38 @@ fun MusicFolderIcon(
                 .clip(shape = RoundedCornerShape(8.dp))
                 .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
         ){
-            if (!imageUri.isNullOrBlank())
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUri)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Music Folder Icon",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            else
-                Icon(
-                    imageVector = Icons.Default.Folder,
-                    contentDescription = "Music Folder Icon",
-                    tint = Color.Black,
-                    modifier = Modifier.align(Alignment.Center)
-                )
+            when {
+                // if imageUri is not null or blank, show image from imageUri
+                !imageUri.isNullOrBlank() -> {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUri)
+                            .crossfade(true)
+                            .build(),
+                        contentDescription = "Music Folder Icon",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                // if imageUri is null or blank and name is favorite, show folder favorite
+                imageUri.isNullOrBlank() && name == "Favorite" -> {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Music Folder Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+                // if imageUri is null or blank and name is not favorite, show folder icon
+                else -> {
+                    Icon(
+                        imageVector = Icons.Default.Folder,
+                        contentDescription = "Music Folder Icon",
+                        tint = Color.Black,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
+                }
+            }
         }
     }
 

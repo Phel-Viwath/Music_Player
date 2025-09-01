@@ -98,6 +98,7 @@ fun PlaylistMusicScreen(
             playlistViewModel.onEvent(PlaylistEvent.LoadPlaylist)
             playlistViewModel.onEvent(PlaylistEvent.LoadPlaylistSong)
         }catch (e: Exception){
+            Log.e("PlaylistMusicScreen", "Failed to load playlist music: ", e)
             error = "Failed to load playlist music: ${e.message}"
             showErrorDialog = true
         }
@@ -130,9 +131,7 @@ fun PlaylistMusicScreen(
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Transparent
-                ),
+                colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent),
                 actions = {
                     IconButton(onClick = { showMenu = true }) {
                         Icon(Icons.Filled.MoreVert, contentDescription = "More")

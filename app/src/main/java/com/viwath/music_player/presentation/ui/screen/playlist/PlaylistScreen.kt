@@ -102,13 +102,20 @@ fun PlaylistScreen(
                     .fillMaxWidth()
                     .padding(top = 8.dp)
             ) {
-                items(state.playlists, key = { "${it.playlistId}" }){ playlistItem ->
+                items(state.playlists, key = { "${it.playlistId} ${it.name}" }){ playlistItem ->
                     Log.d("PlaylistScreen", "all playlist load: $playlistItem")
                     PlaylistItem(playlistItem){
                         // navigate to playlist music
-                        navController.navigate(Routes.PlaylistMusicScreen.route + "/${playlistItem.playlistId}"){
-                            launchSingleTop = true
+                        playlistItem.playlistId?.let { id ->
+                            navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){
+                                launchSingleTop = true
+                            }
+                        } ?: run {
+                            navController.navigate(Routes.PlaylistMusicScreen.route + "/0"){
+                                launchSingleTop = true
+                            }
                         }
+
                     }
                 }
             }
