@@ -82,6 +82,7 @@ fun PlaylistMusicScreen(
     // view-model state
     val state = playlistViewModel.state.value
     val currentMusic = musicViewModel.playbackState.collectAsState().value.currentMusic
+    val isPaused = musicViewModel.playbackState.collectAsState().value.isPaused
 
     val context = LocalContext.current
     val playlist = remember (state.playlist) { state.playlist }
@@ -224,6 +225,7 @@ fun PlaylistMusicScreen(
                 modifier = Modifier.fillMaxSize(),
                 musicList = musicList,
                 currentMusic = currentMusic,
+                isPaused = isPaused,
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {

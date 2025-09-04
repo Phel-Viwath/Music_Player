@@ -16,6 +16,7 @@ fun MusicList(
     modifier: Modifier = Modifier,
     musicList: List<MusicDto>,
     currentMusic: MusicDto?,
+    isPaused: Boolean,
     onMusicSelected: (MusicDto) -> Unit
 ) {
     Box(
@@ -31,6 +32,7 @@ fun MusicList(
                 key = {music -> music.id }
             ) { music ->
                 val isPlaying = currentMusic?.id == music.id
+                val isPause = if (currentMusic?.id == music.id) isPaused  else false
                 MusicListItem(
                     music = music,
                     onItemClick = { selectedMusic ->
@@ -39,7 +41,8 @@ fun MusicList(
                     onItemMenuClick = {
                         //
                     },
-                    isPlaying = isPlaying
+                    isPlaying = isPlaying,
+                    isPaused = isPause
                 )
             }
         }

@@ -7,6 +7,7 @@ import com.viwath.music_player.domain.model.dto.MusicDto
 @Stable
 data class PlaybackState(
     val isPlaying: Boolean = false,
+    val isPaused: Boolean = false,
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     val currentMusic: MusicDto? = null,

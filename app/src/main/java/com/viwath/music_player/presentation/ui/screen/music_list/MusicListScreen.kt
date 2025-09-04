@@ -30,6 +30,7 @@ fun MusicListScreen(
     val state = viewModel.state.value
     val showDialog = remember { mutableStateOf(false) }
     val currentMusic = viewModel.playbackState.collectAsState().value.currentMusic
+    val isPaused = viewModel.playbackState.collectAsState().value.isPaused
 
     LaunchedEffect(state.error) {
         if (state.error.isNotBlank())
@@ -45,6 +46,7 @@ fun MusicListScreen(
                 modifier = Modifier,
                 musicList = state.musicFiles,
                 currentMusic = currentMusic,
+                isPaused = isPaused,
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {

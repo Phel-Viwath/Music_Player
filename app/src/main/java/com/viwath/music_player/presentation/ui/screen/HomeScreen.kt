@@ -23,6 +23,7 @@ import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Album
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Icon
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,13 +39,13 @@ import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
+import com.viwath.music_player.presentation.ui.screen.music_list.component.MainTopBar
 import com.viwath.music_player.presentation.ui.screen.playlist.PlaylistScreen
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 fun HomeScreen(
-    modifier: Modifier = Modifier,
     viewModel: MusicViewModel,
     onMusicSelected: (MusicDto) -> Unit,
     navController: NavController,
@@ -54,9 +55,14 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val selectedTab = pagerState.currentPage
 
-    Box(modifier = modifier){
+    Scaffold(
+        topBar = {
+            MainTopBar()
+        }
+    ){ innerPadding ->
         Column(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
                 .background(Color.Transparent)
         ) {
@@ -87,9 +93,7 @@ fun HomeScreen(
                         }
                     )
 
-                    1 -> AlbumScreen(
-                        navController = navController
-                    )
+                    1 -> AlbumScreen(navController = navController)
 
                     2 -> PlaylistScreen(
                         modifier = Modifier
@@ -101,6 +105,8 @@ fun HomeScreen(
             }
         }
     }
+
+
 
 }
 
@@ -124,7 +130,7 @@ private fun TabBar(
 //                shape = RoundedCornerShape(24.dp)
                 Color.Transparent
             )
-            .padding(4.dp),
+            .padding(horizontal = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(2.dp)
     ) {
         tabs.forEachIndexed { index, tab ->

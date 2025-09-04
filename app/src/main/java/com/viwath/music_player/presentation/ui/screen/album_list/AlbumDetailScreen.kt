@@ -62,6 +62,7 @@ fun AlbumDetailScreen(
     val state = viewModel.state.value
     val playbackState = musicViewModel.playbackState.collectAsState().value
     val currentMusic = playbackState.currentMusic
+    val isPaused = playbackState.isPaused
 
     var showDialog by remember { mutableStateOf(false) }
 
@@ -113,6 +114,7 @@ fun AlbumDetailScreen(
                     .fillMaxHeight(),
                 musicList = state.musics,
                 currentMusic = currentMusic,
+                isPaused = isPaused,
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {

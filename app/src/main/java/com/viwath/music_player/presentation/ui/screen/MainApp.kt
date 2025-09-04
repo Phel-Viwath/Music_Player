@@ -1,8 +1,8 @@
 package com.viwath.music_player.presentation.ui.screen
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
@@ -57,21 +57,21 @@ fun MainApp(
 
     Scaffold (
         bottomBar = {
-            Box{
-                Column {
-                    if (!showMusicDetail && currentMusic != null){
-                        MiniPlayer(
-                            musicViewModel = musicViewModel,
-                            onTap = { showMusicDetail = true }
-                        )
-                    }
+            Box(
+                modifier = Modifier.fillMaxWidth()
+            ){
+                if (!showMusicDetail && currentMusic != null){
+                    MiniPlayer(
+                        musicViewModel = musicViewModel,
+                        onTap = { showMusicDetail = true }
+                    )
                 }
             }
         }
     ){ innerPadding ->
         AmbientGradientBackground(modifier = Modifier.fillMaxSize())
         NavHost(
-            modifier = Modifier,
+            modifier = Modifier.padding(innerPadding),
             navController = navController,
             startDestination = Routes.HomeScreen.route
         ){
@@ -79,7 +79,6 @@ fun MainApp(
                 route = Routes.HomeScreen.route
             ){
                 HomeScreen(
-                    modifier = Modifier.padding(innerPadding),
                     viewModel = musicViewModel,
                     onMusicSelected = {
                         currentMusic = it

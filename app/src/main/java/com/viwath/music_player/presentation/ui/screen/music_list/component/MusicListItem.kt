@@ -14,9 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Pause
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
@@ -38,11 +41,12 @@ fun MusicListItem(
     music: MusicDto,
     onItemClick: (MusicDto) -> Unit,
     onItemMenuClick: (MusicDto) -> Unit,
-    isPlaying: Boolean = false
+    isPlaying: Boolean = false,
+    isPaused: Boolean = false
 ){
     Log.d("MusicListItem", "MusicListItem image path is: ${music.imagePath}")
-    val backgroundColor = if (isPlaying) Color(0xFF1DB954) else Color.Transparent
-    Box(modifier = Modifier.background(backgroundColor)){
+    val textColor = if (isPlaying) Color.Green else Color.White
+    Box(modifier = Modifier.background(Color.Transparent)){
         Row(
             modifier = Modifier
                 .background(Color.Transparent)
@@ -52,18 +56,42 @@ fun MusicListItem(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ){
-            Image(
-                painter = rememberAsyncImagePainter(music.imagePath ?: R.drawable.ic_launcher_foreground),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(60.dp)
-                    .clip(RoundedCornerShape(8.dp))
-                    .border(
-                        BorderStroke(1.dp, Color.Black),
-                        shape = RoundedCornerShape(8.dp)
+            Box {
+                Image(
+                    painter = rememberAsyncImagePainter(music.imagePath ?: R.drawable.ic_launcher_foreground),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .size(60.dp)
+                        .clip(RoundedCornerShape(8.dp))
+                        .border(
+                            BorderStroke(1.dp, Color.Black),
+                            shape = RoundedCornerShape(8.dp)
+                        )
+                )
+                if (isPlaying)
+                    Icon(
+                        imageVector = Icons.Default.Pause,
+                        contentDescription = "Play",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .background(Color.Green, shape = CircleShape)
+                            .size(12.dp)
+                            .padding(2.dp)
                     )
-            )
+                if (isPaused)
+                    Icon(
+                        imageVector = Icons.Default.PlayArrow,
+                        contentDescription = "Play",
+                        tint = Color.Black,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .background(Color.Green, shape = CircleShape)
+                            .size(12.dp)
+                            .padding(2.dp)
+                    )
+            }
 
             Column(
                 modifier = Modifier
@@ -74,14 +102,14 @@ fun MusicListItem(
             ) {
                 Text(
                     text = music.title,
-                    color = Color.White,
+                    color = textColor,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Medium,
                     maxLines = 1
                 )
                 Text(
                     text = music.artist,
-                    color = Color.Gray,
+                    color = Color.LightGray,
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Normal,
                     maxLines = 1

@@ -286,6 +286,7 @@ class MusicService : Service() {
 
         _playbackState.value = PlaybackState(
             isPlaying = exoPlayer.isPlaying,
+            isPaused = !exoPlayer.isPlaying && exoPlayer.playbackState == Player.STATE_READY,
             currentPosition = position,
             duration = duration,
             currentMusic = currentMusic?.toMusicDto(),
