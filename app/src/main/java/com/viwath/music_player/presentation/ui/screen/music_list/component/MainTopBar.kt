@@ -1,14 +1,9 @@
 package com.viwath.music_player.presentation.ui.screen.music_list.component
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
-import androidx.compose.material.icons.filled.Android
-import androidx.compose.material.icons.filled.Filter
-import androidx.compose.material.icons.filled.Filter1
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton

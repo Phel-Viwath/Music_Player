@@ -38,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
+import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MainTopBar
 import com.viwath.music_player.presentation.ui.screen.playlist.PlaylistScreen
@@ -60,6 +61,7 @@ fun HomeScreen(
             MainTopBar()
         }
     ){ innerPadding ->
+        AmbientGradientBackground(modifier = Modifier.fillMaxSize())
         Column(
             modifier = Modifier
                 .padding(innerPadding)

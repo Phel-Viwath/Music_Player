@@ -19,14 +19,12 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.SkipNext
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,47 +36,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.ui.screen.music_detail.component.CustomProgressBar
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MiniPlayer(
     modifier: Modifier = Modifier,
-    musicViewModel: MusicViewModel,
-    onTap: () -> Unit = {}
-){
-
-    val playbackState = musicViewModel.playbackState.collectAsState().value
-    val isPlaying = playbackState.isPlaying
-    val currentMusic = playbackState.currentMusic
-
-    if (currentMusic != null){
-        MiniPlayerCard(
-            modifier = modifier.height(70.dp),
-            isPlaying = isPlaying,
-            currentMusic = currentMusic,
-            onTap = onTap,
-            onResumeClick = { musicViewModel.resumeMusic() },
-            onPauseClick = { musicViewModel.pauseMusic() },
-            onPlayNextClick = { musicViewModel.nextMusic() },
-            duration = playbackState.duration,
-            currentPosition = playbackState.currentPosition
-        )
-    }
-
-}
-
-@Composable
-fun MiniPlayerCard(
-    modifier: Modifier = Modifier,
     isPlaying: Boolean,
     currentMusic: MusicDto,
+    duration: Long,
+    currentPosition: Long,
     onTap: () -> Unit = {},
     onResumeClick: () -> Unit,
     onPauseClick: () -> Unit,
     onPlayNextClick: () -> Unit,
-    duration: Long,
-    currentPosition: Long
+    onSeekTo: (Long) -> Unit
 ){
     Card(
         modifier = modifier.fillMaxWidth().clickable { onTap() },
@@ -179,6 +150,13 @@ fun MiniPlayerCard(
                     .height(4.dp),
                 color = Color.Green,
                 trackColor = Color.LightGray
+            )
+
+            CustomProgressBar(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                currentPosition = currentPosition,
+                duration = duration,
+                onSeekTo = { position -> onSeekTo(position) }
             )
         }
 

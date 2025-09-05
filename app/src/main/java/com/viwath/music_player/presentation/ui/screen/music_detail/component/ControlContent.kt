@@ -15,10 +15,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,19 +27,23 @@ import androidx.compose.ui.unit.sp
 import com.viwath.music_player.R
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.state.FavoriteToggleState
+import com.viwath.music_player.presentation.ui.screen.state.PlaybackState
 import com.viwath.music_player.presentation.ui.screen.state.PlayingMode
-import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
 @Composable
 fun ControlContent(
     modifier: Modifier = Modifier,
     musicDto: MusicDto,
     favoriteToggleState: FavoriteToggleState,
-    viewModel: MusicViewModel,
-    onFavoriteClick: () -> Unit
+    playbackState: PlaybackState,
+    playingMode: PlayingMode,
+    onFavoriteClick: () -> Unit,
+    onSeekTo: (Long) -> Unit,
+    onPreviousClick: () -> Unit,
+    onNextClick: () -> Unit,
+    onPlayPauseClick: () -> Unit,
+    onRepeatClick: () -> Unit,
 ){
-    val playbackState by viewModel.playbackState.collectAsState()
-    var playingMode = remember { mutableStateOf(PlayingMode.REPEAT_ALL) }
     val favoriteIcon = if (favoriteToggleState == FavoriteToggleState.FAVORITE)
         Icons.Default.Favorite
     else Icons.Default.FavoriteBorder
@@ -115,9 +115,7 @@ fun ControlContent(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 currentPosition = playbackState.currentPosition,
                 duration = playbackState.duration,
-                onSeekTo = { position ->
-                    viewModel.seekTo(position)
-                },
+                onSeekTo = { position -> onSeekTo(position) }
             )
 
             Row(
@@ -129,26 +127,10 @@ fun ControlContent(
 
                 // repeat
                 IconButton(
-                    onClick = {
-                        playingMode.value = when (playingMode.value) {
-                            PlayingMode.REPEAT_ALL -> {
-                                viewModel.repeatOne()
-                                PlayingMode.REPEAT_ONE
-                            }
-                            PlayingMode.REPEAT_ONE -> {
-                                viewModel.shuffleMode(true)
-                                PlayingMode.SHUFFLE
-                            }
-                            PlayingMode.SHUFFLE -> {
-                                viewModel.shuffleMode(false)
-                                viewModel.repeatAll()
-                                PlayingMode.REPEAT_ALL
-                            }
-                        }
-                    },
+                    onClick = onRepeatClick,
                     modifier = Modifier.size(56.dp)
                 ) {
-                    val icon = when (playingMode.value) {
+                    val icon = when (playingMode) {
                         PlayingMode.REPEAT_ALL -> R.drawable.ic_repeat
                         PlayingMode.REPEAT_ONE -> R.drawable.ic_repeat_once
                         PlayingMode.SHUFFLE -> R.drawable.ic_shuffle
@@ -164,9 +146,7 @@ fun ControlContent(
 
                 // previous
                 IconButton(
-                    onClick = {
-                        viewModel.previousMusic()
-                    },
+                    onClick = onPreviousClick,
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(
@@ -180,15 +160,13 @@ fun ControlContent(
 
                 // play/pause
                 IconButton(
-                    onClick = {
-                        if (!playbackState.isPlaying)
-                            viewModel.playMusic(musicDto)
-                        else viewModel.pauseMusic()
-                    },
+                    onClick = onPlayPauseClick,
                     modifier = Modifier.size(72.dp)
                 ) {
                     Icon(
-                        painter = if (!playbackState.isPlaying) painterResource(R.drawable.ic_pause) else painterResource(R.drawable.ic_play),
+                        painter = if (!playbackState.isPlaying)
+                            painterResource(R.drawable.ic_pause)
+                        else painterResource(R.drawable.ic_play),
                         contentDescription = if (playbackState.isPlaying) "pause" else "play",
                         tint = Color.White,
                         modifier = Modifier
@@ -198,9 +176,7 @@ fun ControlContent(
 
                 // next
                 IconButton(
-                    onClick = {
-                        viewModel.nextMusic()
-                    },
+                    onClick = onNextClick,
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(

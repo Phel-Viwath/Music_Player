@@ -116,12 +116,10 @@ fun PlaylistMusicScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    playlist?.let {
-                        Text(
-                            text = it.name,
-                            color = Color.White
-                        )
-                    }
+                    Text(
+                        text = playlist?.name ?: "Favorite",
+                        color = Color.White
+                    )
                 },
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {

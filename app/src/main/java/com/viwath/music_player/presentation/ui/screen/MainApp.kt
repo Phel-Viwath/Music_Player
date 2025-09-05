@@ -1,25 +1,25 @@
 package com.viwath.music_player.presentation.ui.screen
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
-import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistMusicScreen
@@ -50,28 +50,34 @@ fun MainApp(
     musicViewModel: MusicViewModel
 ){
     val navController = rememberNavController()
+    val playbackState = musicViewModel.playbackState.collectAsState().value
 
     var currentMusic by remember { mutableStateOf<MusicDto?>(null) }
     var showMusicDetail by remember { mutableStateOf(false) }
     var homeInitialTab by remember { mutableIntStateOf(0) }
 
-    Scaffold (
+    Scaffold(
         bottomBar = {
-            Box(
-                modifier = Modifier.fillMaxWidth()
-            ){
-                if (!showMusicDetail && currentMusic != null){
-                    MiniPlayer(
-                        musicViewModel = musicViewModel,
-                        onTap = { showMusicDetail = true }
-                    )
-                }
+            if (!showMusicDetail && currentMusic != null){
+                MiniPlayer(
+                    modifier = Modifier.height(70.dp),
+                    onTap = { showMusicDetail = true },
+                    isPlaying = playbackState.isPlaying,
+                    currentMusic = currentMusic!!,
+                    onResumeClick = { musicViewModel.resumeMusic() },
+                    onPauseClick = { musicViewModel.pauseMusic() },
+                    onPlayNextClick = { musicViewModel.nextMusic() },
+                    duration = playbackState.duration,
+                    currentPosition = playbackState.currentPosition,
+                    onSeekTo = { position -> musicViewModel.seekTo(position) }
+                )
             }
         }
     ){ innerPadding ->
-        AmbientGradientBackground(modifier = Modifier.fillMaxSize())
         NavHost(
-            modifier = Modifier.padding(innerPadding),
+            modifier = Modifier
+                .padding(innerPadding)
+                .consumeWindowInsets(innerPadding),
             navController = navController,
             startDestination = Routes.HomeScreen.route
         ){
@@ -131,7 +137,7 @@ fun MainApp(
                     }
                 )
             }
-        }
+        }// end nav host
     }
 
     if (showMusicDetail && currentMusic != null){

@@ -114,8 +114,8 @@ fun MusicFolderIcon(
                     Icon(
                         imageVector = Icons.Default.Favorite,
                         contentDescription = "Music Folder Icon",
-                        tint = Color.Black,
-                        modifier = Modifier.align(Alignment.Center)
+                        tint = Color(0xFF8B5CF6),
+                        modifier = Modifier.align(Alignment.Center).size(size - 4.dp)
                     )
                 }
                 // if imageUri is null or blank and name is not favorite, show folder icon

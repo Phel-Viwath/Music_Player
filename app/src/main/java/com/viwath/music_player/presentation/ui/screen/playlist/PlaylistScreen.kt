@@ -1,6 +1,5 @@
 package com.viwath.music_player.presentation.ui.screen.playlist
 
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -103,7 +102,6 @@ fun PlaylistScreen(
                     .padding(top = 8.dp)
             ) {
                 items(state.playlists, key = { "${it.playlistId} ${it.name}" }){ playlistItem ->
-                    Log.d("PlaylistScreen", "all playlist load: $playlistItem")
                     PlaylistItem(playlistItem){
                         // navigate to playlist music
                         playlistItem.playlistId?.let { id ->
