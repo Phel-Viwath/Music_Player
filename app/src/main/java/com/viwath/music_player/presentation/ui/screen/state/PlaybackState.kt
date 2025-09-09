@@ -11,5 +11,6 @@ data class PlaybackState(
     val currentPosition: Long = 0L,
     val duration: Long = 0L,
     val currentMusic: MusicDto? = null,
-    val playbackState: Int = Player.STATE_IDLE
+    val playbackState: Int = Player.STATE_IDLE,
+    val playingMode: PlayingMode = PlayingMode.REPEAT_ALL
 )

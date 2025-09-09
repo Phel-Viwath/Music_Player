@@ -31,6 +31,7 @@ import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientB
 import com.viwath.music_player.presentation.ui.screen.component.Dialog
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
 import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
@@ -118,7 +119,7 @@ fun AlbumDetailScreen(
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {
-                        musicViewModel.playMusic(selectedMusic, state.musics)
+                        musicViewModel.onEvent(MusicEvent.OnPlay(selectedMusic, state.musics))
                     }
                     onMusicSelected(selectedMusic)
                 }

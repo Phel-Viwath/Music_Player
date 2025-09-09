@@ -15,17 +15,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import com.viwath.music_player.presentation.ui.screen.MainApp
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
-import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 import dagger.hilt.android.AndroidEntryPoint
-import kotlin.getValue
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val musicViewModel: MusicViewModel by viewModels()
-    private val playlistViewModel : PlaylistViewModel by viewModels()
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -36,7 +34,7 @@ class MainActivity : ComponentActivity() {
 
         if (readPermissionGranted) {
             Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-            musicViewModel.loadMusicFiles()
+            musicViewModel.onEvent(MusicEvent.OnLoadMusic)
         } else {
             Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
         }
@@ -47,16 +45,12 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        val backgroundColor = Color(0xFF191834)
         enableEdgeToEdge(
             statusBarStyle = SystemBarStyle.dark(
-                scrim = backgroundColor.toArgb()
-            ),
-            navigationBarStyle = SystemBarStyle.dark(
-                scrim = backgroundColor.toArgb()
+                android.graphics.Color.TRANSPARENT
             )
         )
+        super.onCreate(savedInstanceState)
         checkPermissions()
 
         setContent {
@@ -84,7 +78,7 @@ class MainActivity : ComponentActivity() {
         if (!hasReadPermission || !hasNotificationPermission) {
             permissionLauncher.launch(permissions.toTypedArray())
         } else {
-            musicViewModel.loadMusicFiles()
+            musicViewModel.onEvent(MusicEvent.OnLoadMusic)
         }
     }
 

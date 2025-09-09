@@ -32,6 +32,7 @@ import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.toMusicDto
 import com.viwath.music_player.presentation.MainActivity
 import com.viwath.music_player.presentation.ui.screen.state.PlaybackState
+import com.viwath.music_player.presentation.ui.screen.state.PlayingMode
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -235,14 +236,20 @@ class MusicService : Service() {
 
     fun repeatAll(){
         exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
+        updatePlaybackState()
+        updateMediaMetadata()
     }
 
     fun repeatOne(){
         exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
+        updatePlaybackState()
+        updateMediaMetadata()
     }
 
     fun shuffleMode(isShuffle: Boolean){
         exoPlayer.shuffleModeEnabled = isShuffle
+        updatePlaybackState()
+        updateMediaMetadata()
     }
 
     @Suppress("DEPRECATION")
@@ -251,6 +258,15 @@ class MusicService : Service() {
         stopForeground(true)
         stopSelf()
         isServiceStarted = false
+    }
+
+    fun getPlayingMode(): PlayingMode{
+        return when{
+            exoPlayer.shuffleModeEnabled -> PlayingMode.SHUFFLE
+            exoPlayer.repeatMode == Player.REPEAT_MODE_ALL -> PlayingMode.REPEAT_ALL
+            exoPlayer.repeatMode == Player.REPEAT_MODE_ONE -> PlayingMode.REPEAT_ONE
+            else -> PlayingMode.REPEAT_ALL
+        }
     }
 
     private fun prepareAndSetSingleTrack(music: Music) {
@@ -290,7 +306,8 @@ class MusicService : Service() {
             currentPosition = position,
             duration = duration,
             currentMusic = currentMusic?.toMusicDto(),
-            playbackState = exoPlayer.playbackState
+            playbackState = exoPlayer.playbackState,
+            playingMode = getPlayingMode()
         )
 
         mediaSession.setPlaybackState(mediaSessionState)

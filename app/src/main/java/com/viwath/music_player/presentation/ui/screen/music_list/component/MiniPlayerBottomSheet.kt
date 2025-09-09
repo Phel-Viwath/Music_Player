@@ -21,7 +21,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -137,26 +136,14 @@ fun MiniPlayer(
 
             }
 
-            LinearProgressIndicator(
-                progress = {
-                    if (duration > 0) {
-                        (currentPosition.toFloat() / duration.toFloat()).coerceIn(0f, 1f)
-                    } else {
-                        0f
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp),
-                color = Color.Green,
-                trackColor = Color.LightGray
-            )
-
             CustomProgressBar(
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.height(4.dp),
                 currentPosition = currentPosition,
                 duration = duration,
-                onSeekTo = { position -> onSeekTo(position) }
+                onSeekTo = { position -> onSeekTo(position) },
+                thumbColor = Color.Transparent,
+                activeTrackColor = Color.Green,
+                height = 4.dp
             )
         }
 

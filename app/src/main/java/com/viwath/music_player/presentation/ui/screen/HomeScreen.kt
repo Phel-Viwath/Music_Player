@@ -7,8 +7,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,22 +30,31 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
+import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MainTopBar
 import com.viwath.music_player.presentation.ui.screen.playlist.PlaylistScreen
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
@@ -50,18 +62,41 @@ fun HomeScreen(
     viewModel: MusicViewModel,
     onMusicSelected: (MusicDto) -> Unit,
     navController: NavController,
-    initialTab: Int = 0
+    initialTab: Int = 0,
+    coroutinesScope: CoroutineScope = rememberCoroutineScope()
 ){
     val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = initialTab)
     val scope = rememberCoroutineScope()
     val selectedTab = pagerState.currentPage
+    val selectedOrder = viewModel.state.value.sortOrder
+
 
     Scaffold(
         topBar = {
-            MainTopBar()
+            MainTopBar(
+                selectedOption = selectedOrder,
+            ){ order ->
+                coroutinesScope.launch(Dispatchers.Main){
+                    viewModel.onEvent(MusicEvent.Order(order))
+                    delay(500)
+                    viewModel.onEvent(MusicEvent.GetOrder)
+                    delay(500)
+                    viewModel.onEvent(MusicEvent.OnLoadMusic)
+                }
+            }
         }
     ){ innerPadding ->
-        AmbientGradientBackground(modifier = Modifier.fillMaxSize())
+
+        val contentPadding = PaddingValues(
+            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
+            top = 0.dp,
+            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
+            bottom = innerPadding.calculateBottomPadding()
+        )
+
+        AmbientGradientBackground(
+            modifier = Modifier.fillMaxSize()
+        )
         Column(
             modifier = Modifier
                 .padding(innerPadding)

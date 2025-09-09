@@ -28,6 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.viwath.music_player.core.util.formatTime
@@ -39,6 +40,9 @@ fun CustomProgressBar(
     currentPosition: Long,
     duration: Long,
     onSeekTo: (Long) -> Unit,
+    thumbColor: Color,
+    activeTrackColor: Color,
+    height: Dp
 ){
     var sliderPosition by remember { mutableFloatStateOf(0f) }
     var isUserSeeking by remember { mutableStateOf(false) }
@@ -58,7 +62,7 @@ fun CustomProgressBar(
         Slider(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(36.dp),
+                .height(height),
             value = sliderPosition,
             onValueChange = {
                 sliderPosition = it
@@ -69,8 +73,8 @@ fun CustomProgressBar(
                 isUserSeeking = false
             },
             colors = SliderDefaults.colors(
-                thumbColor = Color.White,
-                activeTrackColor = Color.White,
+                thumbColor = thumbColor,
+                activeTrackColor = activeTrackColor,
                 inactiveTrackColor = Color.White.copy(alpha = 0.3f),
             ),
             valueRange = 0f..1f,
@@ -79,7 +83,7 @@ fun CustomProgressBar(
                     modifier = Modifier
                         .size(16.dp)
                         .shadow(4.dp, CircleShape)
-                        .background(Color.White, CircleShape)
+                        .background(thumbColor, CircleShape)
                 )
             },
             track = {
@@ -94,7 +98,7 @@ fun CustomProgressBar(
                         Modifier
                             .fillMaxWidth(sliderPosition)
                             .fillMaxHeight()
-                            .background(Color.White)
+                            .background(activeTrackColor)
                     )
                 }
             }

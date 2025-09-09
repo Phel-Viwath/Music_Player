@@ -20,6 +20,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistMusicScreen
@@ -64,12 +65,14 @@ fun MainApp(
                     onTap = { showMusicDetail = true },
                     isPlaying = playbackState.isPlaying,
                     currentMusic = currentMusic!!,
-                    onResumeClick = { musicViewModel.resumeMusic() },
-                    onPauseClick = { musicViewModel.pauseMusic() },
-                    onPlayNextClick = { musicViewModel.nextMusic() },
+                    onResumeClick = { musicViewModel.onEvent(MusicEvent.OnResume) },
+                    onPauseClick = { musicViewModel.onEvent(MusicEvent.OnPause) },
+                    onPlayNextClick = { musicViewModel.onEvent(MusicEvent.OnPlayNext) },
                     duration = playbackState.duration,
                     currentPosition = playbackState.currentPosition,
-                    onSeekTo = { position -> musicViewModel.seekTo(position) }
+                    onSeekTo = { position ->
+                        musicViewModel.onEvent(MusicEvent.OnSeekTo(position))
+                    }
                 )
             }
         }

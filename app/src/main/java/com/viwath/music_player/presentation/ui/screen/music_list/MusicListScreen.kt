@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
 @Composable
@@ -50,7 +51,7 @@ fun MusicListScreen(
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {
-                        viewModel.playMusic(selectedMusic, state.musicFiles)
+                        viewModel.onEvent(MusicEvent.OnPlay(selectedMusic, state.musicFiles))
                     }
                     onMusicSelected(selectedMusic)
                 }

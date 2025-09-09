@@ -43,6 +43,7 @@ import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.Routes
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.music_list.ShowDialog
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
@@ -227,7 +228,7 @@ fun PlaylistMusicScreen(
                 onMusicSelected = { selectedMusic ->
                     val isPlaying = currentMusic?.id == selectedMusic.id
                     if (!isPlaying) {
-                        musicViewModel.playMusic(selectedMusic, musicList)
+                        musicViewModel.onEvent(MusicEvent.OnPlay(selectedMusic, musicList))
                     }
                     onMusicSelected(selectedMusic)
                 }

@@ -21,6 +21,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
+import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.ControlContent
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.ImageContent
 import com.viwath.music_player.presentation.ui.screen.state.FavoriteToggleState
@@ -41,8 +42,6 @@ fun MusicDetailScreen(
     var isFavorite by remember(music.id) { mutableStateOf(music.isFavorite) }
     var isCurrentFavorite by remember { mutableStateOf(false) }
     val currentMusicFavorite = favorViewModel.isFavorite(currentMusic.id.toString())
-
-    val playingMode = remember { mutableStateOf(PlayingMode.REPEAT_ALL) }
 
 
     LaunchedEffect(music) {
@@ -94,7 +93,7 @@ fun MusicDetailScreen(
                     else FavoriteToggleState.NOT_FAVORITE
                 },
                 playbackState = playbackState,
-                playingMode = playingMode.value,
+                playingMode = playbackState.playingMode,
                 onFavoriteClick = {
                     isFavorite = !isFavorite
                     if (isFavorite) {
@@ -107,30 +106,30 @@ fun MusicDetailScreen(
                         favorViewModel.onEvent(FavorEvent.DeleteFavorite)
                     }
                 },
-                onSeekTo = { position -> viewModel.seekTo(position) },
-                onPreviousClick = { viewModel.previousMusic() },
-                onNextClick = { viewModel.nextMusic() },
+                onSeekTo = { position -> viewModel.onEvent(MusicEvent.OnSeekTo(position)) },
+                onPreviousClick = { viewModel.onEvent(MusicEvent.OnPlayPrevious) },
+                onNextClick = { viewModel.onEvent(MusicEvent.OnPlayNext) },
                 onRepeatClick = {
-                    playingMode.value = when(playingMode.value){
+                    when(playbackState.playingMode){
                         PlayingMode.REPEAT_ALL -> {
-                            viewModel.repeatOne()
+                            viewModel.onEvent(MusicEvent.OnRepeatOne)
                             PlayingMode.REPEAT_ONE
                         }
                         PlayingMode.REPEAT_ONE -> {
-                            viewModel.shuffleMode(true)
+                            viewModel.onEvent(MusicEvent.ShuffleMode(true))
                             PlayingMode.SHUFFLE
                         }
                         PlayingMode.SHUFFLE -> {
-                            viewModel.shuffleMode(false)
-                            viewModel.repeatAll()
+                            viewModel.onEvent(MusicEvent.ShuffleMode(false))
+                            viewModel.onEvent(MusicEvent.OnRepeatAll)
                             PlayingMode.REPEAT_ALL
                         }
                     }
                 },
                 onPlayPauseClick = {
                     if (!playbackState.isPlaying)
-                        viewModel.playMusic(currentMusic)
-                    else viewModel.pauseMusic()
+                        viewModel.onEvent(MusicEvent.OnPlay(currentMusic))
+                    else viewModel.onEvent(MusicEvent.OnPause)
                 }
             )
 

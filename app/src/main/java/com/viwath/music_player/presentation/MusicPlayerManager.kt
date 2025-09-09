@@ -15,7 +15,9 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
-class MusicPlayerManager @Inject constructor(@param:ApplicationContext private val context: Context) {
+class MusicPlayerManager @Inject constructor(
+    @param:ApplicationContext private val context: Context
+) {
     private var musicService: MusicService? = null
     private var isServiceBound = false
 
@@ -98,6 +100,5 @@ class MusicPlayerManager @Inject constructor(@param:ApplicationContext private v
     fun repeatOne(){
         musicService?.repeatOne()
     }
-
 
 }

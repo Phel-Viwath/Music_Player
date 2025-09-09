@@ -90,7 +90,7 @@ fun ControlContent(
                 ) {
                     Icon(
                         imageVector = favoriteIcon,
-                        tint  = if (favoriteToggleState == FavoriteToggleState.FAVORITE) Color.Red else Color.White,
+                        tint  = if (favoriteToggleState == FavoriteToggleState.FAVORITE) Color.Green else Color.White,
                         contentDescription = null,
                         modifier = Modifier
                             .size(24.dp)
@@ -115,7 +115,10 @@ fun ControlContent(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 currentPosition = playbackState.currentPosition,
                 duration = playbackState.duration,
-                onSeekTo = { position -> onSeekTo(position) }
+                onSeekTo = { position -> onSeekTo(position) },
+                thumbColor = Color.White,
+                activeTrackColor = Color.White,
+                height = 36.dp
             )
 
             Row(

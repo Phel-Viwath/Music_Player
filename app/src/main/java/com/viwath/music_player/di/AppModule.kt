@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.room.Room
+import com.viwath.music_player.core.util.MyPrefs
 import com.viwath.music_player.data.data_source.MusicDatabase
 import com.viwath.music_player.data.repository.MusicRepositoryImp
 import com.viwath.music_player.domain.repository.MusicRepository
@@ -103,4 +104,12 @@ object AppModule {
     @Provides
     @Singleton
     fun provideClearCacheUseCase(repository: MusicRepository): ClearCacheUseCase = ClearCacheUseCase(repository)
+
+
+    @Singleton
+    @Provides
+    fun provideMyPrefs(
+        @ApplicationContext context: Context
+    ): MyPrefs = MyPrefs(context)
+
 }
