@@ -12,4 +12,5 @@ sealed class Routes(val route: String) {
     data object PlaylistMusicScreen: Routes("playlist_music")
     data object MusicPickerScreen: Routes("music_picker")
     data object AlbumDetailScreen: Routes("album_detail")
+    data object SearchScreen: Routes("search_screen")
 }

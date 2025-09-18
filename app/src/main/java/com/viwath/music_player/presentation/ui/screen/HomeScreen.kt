@@ -7,11 +7,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.calculateEndPadding
-import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,20 +28,15 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
@@ -70,80 +63,88 @@ fun HomeScreen(
     val selectedTab = pagerState.currentPage
     val selectedOrder = viewModel.state.value.sortOrder
 
-
-    Scaffold(
-        topBar = {
-            MainTopBar(
-                selectedOption = selectedOrder,
-            ){ order ->
-                coroutinesScope.launch(Dispatchers.Main){
-                    viewModel.onEvent(MusicEvent.Order(order))
-                    delay(500)
-                    viewModel.onEvent(MusicEvent.GetOrder)
-                    delay(500)
-                    viewModel.onEvent(MusicEvent.OnLoadMusic)
-                }
-            }
-        }
-    ){ innerPadding ->
-
-        val contentPadding = PaddingValues(
-            start = innerPadding.calculateStartPadding(LocalLayoutDirection.current),
-            top = 0.dp,
-            end = innerPadding.calculateEndPadding(LocalLayoutDirection.current),
-            bottom = innerPadding.calculateBottomPadding()
-        )
-
-        AmbientGradientBackground(
-            modifier = Modifier.fillMaxSize()
-        )
-        Column(
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize()
-                .background(Color.Transparent)
-        ) {
-            TabBar(
-                modifier = Modifier.background(Color.Transparent),
-                selectedTabIndex = selectedTab,
-                onTabSelected = {
-                    scope.launch {
-                        pagerState.animateScrollToPage(it)
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+    ){
+        Scaffold(
+            topBar = {
+                MainTopBar(
+                    selectedOption = selectedOrder,
+                    onSearchIconClick = {
+                        navController.navigate(
+                            Routes.SearchScreen.route,
+                        )
+                    },
+                    currentOrderOption = { order ->
+                        coroutinesScope.launch(Dispatchers.Main) {
+                            viewModel.onEvent(MusicEvent.Order(order))
+                            delay(500)
+                            viewModel.onEvent(MusicEvent.GetOrder)
+                            delay(500)
+                            viewModel.onEvent(MusicEvent.OnLoadMusic)
+                        }
                     }
-                }
+                )
+            },
+            contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+        ){ innerPadding ->
+
+            AmbientGradientBackground(
+                modifier = Modifier.fillMaxSize()
             )
 
-            HorizontalPager(
-                state = pagerState,
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            ) { page ->
-                when(page) {
-                    0 -> MusicListScreen(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .fillMaxHeight(),
-                        viewModel = viewModel,
-                        onMusicSelected = { selectedMusic ->
-                            onMusicSelected(selectedMusic)
+                    .padding(innerPadding)
+            ){
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.Transparent)
+                ) {
+                    TabBar(
+                        modifier = Modifier.background(Color.Transparent),
+                        selectedTabIndex = selectedTab,
+                        onTabSelected = {
+                            scope.launch {
+                                pagerState.animateScrollToPage(it)
+                            }
                         }
                     )
 
-                    1 -> AlbumScreen(navController = navController)
-
-                    2 -> PlaylistScreen(
+                    HorizontalPager(
+                        state = pagerState,
                         modifier = Modifier
-                            .fillMaxSize()
-                            .background(Color.Transparent),
-                        navController = navController
-                    )
+                            .fillMaxWidth()
+                            .fillMaxHeight()
+                    ) { page ->
+                        when(page) {
+                            0 -> MusicListScreen(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(),
+                                viewModel = viewModel,
+                                onMusicSelected = { selectedMusic ->
+                                    onMusicSelected(selectedMusic)
+                                }
+                            )
+
+                            1 -> AlbumScreen(navController = navController)
+
+                            2 -> PlaylistScreen(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(Color.Transparent),
+                                navController = navController
+                            )
+                        }
+                    }
                 }
             }
+
         }
     }
-
-
 
 }
 

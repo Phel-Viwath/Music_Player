@@ -37,8 +37,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.viwath.music_player.domain.model.Album
 import com.viwath.music_player.presentation.ui.screen.Routes
-import com.viwath.music_player.presentation.ui.screen.component.Dialog
-import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
+import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 
 

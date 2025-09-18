@@ -28,7 +28,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
-import com.viwath.music_player.presentation.ui.screen.component.Dialog
+import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
 import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent

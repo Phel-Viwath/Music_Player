@@ -6,14 +6,15 @@ import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
-import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.ui.Modifier
 import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
@@ -45,17 +46,20 @@ class MainActivity : ComponentActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge(
-            statusBarStyle = SystemBarStyle.dark(
-                android.graphics.Color.TRANSPARENT
-            )
-        )
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+
+        // Turn off the decor fitting system windows, which allows us to handle insets
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
         checkPermissions()
 
         setContent {
             Music_PlayerTheme {
-                MainApp(musicViewModel)
+                Box(modifier = Modifier.fillMaxSize()) {
+                    MainApp(musicViewModel)
+                }
+
             }
         }
     }

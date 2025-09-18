@@ -1,4 +1,4 @@
-package com.viwath.music_player.presentation.ui.screen
+package com.viwath.music_player.presentation.ui.screen.component
 
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api

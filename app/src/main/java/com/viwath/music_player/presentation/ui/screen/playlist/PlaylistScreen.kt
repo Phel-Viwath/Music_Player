@@ -32,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.Playlist
 import com.viwath.music_player.presentation.ui.screen.Routes
-import com.viwath.music_player.presentation.ui.screen.component.Dialog
+import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.playlist.component.NewPlaylistDialogM3
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistItem

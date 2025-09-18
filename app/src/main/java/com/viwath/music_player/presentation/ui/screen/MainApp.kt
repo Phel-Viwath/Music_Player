@@ -1,6 +1,9 @@
 package com.viwath.music_player.presentation.ui.screen
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,10 +23,12 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
+import com.viwath.music_player.presentation.ui.screen.component.BottomSheetMusic
+import com.viwath.music_player.presentation.ui.screen.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
-import com.viwath.music_player.presentation.ui.screen.music_list.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistMusicScreen
+import com.viwath.music_player.presentation.ui.screen.search_screen.SearchScreen
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
@@ -57,91 +62,106 @@ fun MainApp(
     var showMusicDetail by remember { mutableStateOf(false) }
     var homeInitialTab by remember { mutableIntStateOf(0) }
 
-    Scaffold(
-        bottomBar = {
-            if (!showMusicDetail && currentMusic != null){
-                MiniPlayer(
-                    modifier = Modifier.height(70.dp),
-                    onTap = { showMusicDetail = true },
-                    isPlaying = playbackState.isPlaying,
-                    currentMusic = currentMusic!!,
-                    onResumeClick = { musicViewModel.onEvent(MusicEvent.OnResume) },
-                    onPauseClick = { musicViewModel.onEvent(MusicEvent.OnPause) },
-                    onPlayNextClick = { musicViewModel.onEvent(MusicEvent.OnPlayNext) },
-                    duration = playbackState.duration,
-                    currentPosition = playbackState.currentPosition,
-                    onSeekTo = { position ->
-                        musicViewModel.onEvent(MusicEvent.OnSeekTo(position))
-                    }
-                )
-            }
-        }
-    ){ innerPadding ->
-        NavHost(
-            modifier = Modifier
-                .padding(innerPadding)
-                .consumeWindowInsets(innerPadding),
-            navController = navController,
-            startDestination = Routes.HomeScreen.route
-        ){
-            composable(
-                route = Routes.HomeScreen.route
+    Box (
+        modifier = Modifier.fillMaxSize()
+    ){
+        Scaffold(
+            bottomBar = {
+                if (!showMusicDetail && currentMusic != null){
+                    MiniPlayer(
+                        modifier = Modifier.height(70.dp),
+                        onTap = { showMusicDetail = true },
+                        isPlaying = playbackState.isPlaying,
+                        currentMusic = currentMusic!!,
+                        onResumeClick = { musicViewModel.onEvent(MusicEvent.OnResume) },
+                        onPauseClick = { musicViewModel.onEvent(MusicEvent.OnPause) },
+                        onPlayNextClick = { musicViewModel.onEvent(MusicEvent.OnPlayNext) },
+                        duration = playbackState.duration,
+                        currentPosition = playbackState.currentPosition,
+                        onSeekTo = { position ->
+                            musicViewModel.onEvent(MusicEvent.OnSeekTo(position))
+                        }
+                    )
+                }
+            },
+            contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+        ){ innerPadding ->
+            NavHost(
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .consumeWindowInsets(innerPadding),
+                navController = navController,
+                startDestination = Routes.HomeScreen.route
             ){
-                HomeScreen(
-                    viewModel = musicViewModel,
-                    onMusicSelected = {
-                        currentMusic = it
-                        showMusicDetail = true
-                    },
-                    navController = navController,
-                    initialTab = homeInitialTab
-                )
-            }
-            composable(
-                route = Routes.PlaylistMusicScreen.route + "/{playlistId}"
-            ){ backStackEntry ->
-                val playlistViewModel: PlaylistViewModel = hiltViewModel()
-                PlaylistMusicScreen(
-                    musicViewModel = musicViewModel,
-                    playlistViewModel = playlistViewModel,
-                    onNavigateBack = {
-                        homeInitialTab = 2
-                        navController.popBackStack()
-                    },
-                    onMusicSelected = { selectedMusic ->
-                        currentMusic = selectedMusic
-                        showMusicDetail = true
-                    },
-                    navController = navController
-                )
-            }
+                composable(
+                    route = Routes.HomeScreen.route
+                ){
+                    HomeScreen(
+                        viewModel = musicViewModel,
+                        onMusicSelected = {
+                            currentMusic = it
+                            showMusicDetail = true
+                        },
+                        navController = navController,
+                        initialTab = homeInitialTab
+                    )
+                }
+                composable(
+                    route = Routes.PlaylistMusicScreen.route + "/{playlistId}"
+                ){ backStackEntry ->
+                    val playlistViewModel: PlaylistViewModel = hiltViewModel()
+                    PlaylistMusicScreen(
+                        musicViewModel = musicViewModel,
+                        playlistViewModel = playlistViewModel,
+                        onNavigateBack = {
+                            homeInitialTab = 2
+                            navController.popBackStack()
+                        },
+                        onMusicSelected = { selectedMusic ->
+                            currentMusic = selectedMusic
+                            showMusicDetail = true
+                        },
+                        navController = navController
+                    )
+                }
 
-            composable(
-                Routes.MusicPickerScreen.route + "/{playlistId}",
-            ){ backStackEntry ->
-                val playlistViewModel: PlaylistViewModel = hiltViewModel()
-                MusicPicker(
-                    modifier = Modifier,
-                    playlistViewModel = playlistViewModel,
-                    navController = navController
-                )
-            }
+                composable(
+                    Routes.MusicPickerScreen.route + "/{playlistId}",
+                ){ backStackEntry ->
+                    val playlistViewModel: PlaylistViewModel = hiltViewModel()
+                    MusicPicker(
+                        modifier = Modifier,
+                        playlistViewModel = playlistViewModel,
+                        navController = navController
+                    )
+                }
 
-            composable(
-                Routes.AlbumDetailScreen.route + "/{albumId}"
-            ) {
-                val albumViewModel: AlbumViewModel = hiltViewModel()
-                AlbumDetailScreen(
-                    navController = navController,
-                    viewModel = albumViewModel,
-                    onMusicSelected = { selectedMusic ->
-                        currentMusic = selectedMusic
-                        showMusicDetail = true
-                    }
-                )
-            }
-        }// end nav host
-    }
+                composable(
+                    Routes.AlbumDetailScreen.route + "/{albumId}"
+                ) {
+                    val albumViewModel: AlbumViewModel = hiltViewModel()
+                    AlbumDetailScreen(
+                        navController = navController,
+                        viewModel = albumViewModel,
+                        onMusicSelected = { selectedMusic ->
+                            currentMusic = selectedMusic
+                            showMusicDetail = true
+                        }
+                    )
+                }
+
+                composable(
+                    route = Routes.SearchScreen.route
+                ){
+                    SearchScreen(
+                        navController = navController
+                    )
+                }
+            }// end nav host
+        }// end scaffold
+    }// end box
+
+
 
     if (showMusicDetail && currentMusic != null){
         BottomSheetMusic(

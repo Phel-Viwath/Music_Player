@@ -4,6 +4,7 @@ package com.viwath.music_player.presentation.viewmodel
 
 import android.util.Log
 import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -17,6 +18,7 @@ import com.viwath.music_player.presentation.MusicPlayerManager
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.state.MusicState
 import com.viwath.music_player.presentation.ui.screen.state.PlaybackState
+import com.viwath.music_player.presentation.ui.screen.state.SearchState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -38,6 +40,9 @@ class MusicViewModel @Inject constructor(
 
     private val _currentMusic = mutableStateOf<MusicDto?>(null)
     val currentMusic: State<MusicDto?> get() = _currentMusic
+
+    private val _searchState = mutableStateOf(SearchState())
+    val searchState: State<SearchState> get() = _searchState
 
     init {
         // get order from shared preferences
@@ -65,8 +70,11 @@ class MusicViewModel @Inject constructor(
     fun onEvent(event: MusicEvent){
         when(event){
             is MusicEvent.Order -> { saveOrder(event.sortOrder) }
-            is MusicEvent.SearchClick -> {}
-            is MusicEvent.SearchTextChange -> {}
+            is MusicEvent.SearchClick -> searchMusic()
+            is MusicEvent.SearchTextChange -> {
+                _searchState.value = _searchState.value.copy(searchText = event.searchText)
+                searchMusic()
+            }
 
             is MusicEvent.OnLoadMusic -> loadMusicFiles()
             is MusicEvent.OnPlayNext -> nextMusic()
@@ -154,6 +162,27 @@ class MusicViewModel @Inject constructor(
             _state.value = _state.value.copy(sortOrder = sortOrder)
         }catch (e: Exception){
             Log.e("MusicViewModel", "getOrder: ${e.message}")
+        }
+    }
+
+
+    // search
+    private fun searchMusic(){
+        val searchText = _searchState.value.searchText
+        if (searchText.isEmpty()){
+            _searchState.value = _searchState.value.copy(musicList = emptyList())
+            return
+        }
+        val musicList = _state.value.musicFiles
+        viewModelScope.launch {
+            try {
+                val musicList = musicList.filter { musicDto ->
+                    musicDto.title.contains(searchText, ignoreCase = true)
+                }
+                _searchState.value = _searchState.value.copy(musicList = musicList)
+            }catch (e: Exception){
+                Log.e("MusicViewModel", "searchMusic: ${e.message}")
+            }
         }
     }
 

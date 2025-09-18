@@ -1,4 +1,4 @@
-package com.viwath.music_player.presentation.ui.screen.component
+package com.viwath.music_player.presentation.ui.screen.dialog
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning

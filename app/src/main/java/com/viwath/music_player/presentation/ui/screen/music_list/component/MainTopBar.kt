@@ -2,7 +2,6 @@ package com.viwath.music_player.presentation.ui.screen.music_list.component
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Search
@@ -28,6 +27,7 @@ import com.viwath.music_player.presentation.ui.screen.music_detail.component.Dro
 @Composable
 fun MainTopBar(
     selectedOption: SortOrder,
+    onSearchIconClick: () -> Unit,
     currentOrderOption: (SortOrder) -> Unit
 ){
 
@@ -39,7 +39,7 @@ fun MainTopBar(
                 painter = painterResource(R.drawable.v_music),
                 contentDescription = "Android Icon",
                 tint = Color.White
-            )
+            ) // end of icon
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = Color.Transparent
@@ -70,7 +70,7 @@ fun MainTopBar(
             }
             // search
             IconButton(
-                onClick = {}
+                onClick = onSearchIconClick
             ){
                 Icon(
                     imageVector = Icons.Default.Search,
@@ -80,4 +80,6 @@ fun MainTopBar(
             }
         },
     )
+
+
 }

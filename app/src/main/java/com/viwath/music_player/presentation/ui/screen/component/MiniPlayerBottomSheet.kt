@@ -1,4 +1,4 @@
-package com.viwath.music_player.presentation.ui.screen.music_list.component
+package com.viwath.music_player.presentation.ui.screen.component
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
