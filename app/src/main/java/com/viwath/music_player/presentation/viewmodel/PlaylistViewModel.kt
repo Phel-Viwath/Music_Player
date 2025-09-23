@@ -13,7 +13,7 @@ import com.viwath.music_player.domain.model.PlaylistSong
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.domain.use_case.ClearCacheUseCase
-import com.viwath.music_player.domain.use_case.FavoriteUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.FavoriteUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.PlaylistUseCase
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.state.PlaylistState

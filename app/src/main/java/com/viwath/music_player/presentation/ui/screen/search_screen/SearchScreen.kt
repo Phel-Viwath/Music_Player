@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -18,8 +18,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import com.viwath.music_player.presentation.ui.screen.component.SearchBar3
-import com.viwath.music_player.presentation.ui.screen.component.SearchList
+import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
@@ -27,23 +26,31 @@ import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 @Composable
 fun SearchScreen(
     navController: NavController,
-    musicViewModel: MusicViewModel = hiltViewModel()
+    musicViewModel: MusicViewModel = hiltViewModel(),
+    onTab: () -> Unit,
+    selectedMusic: (MusicDto) -> Unit
 ){
 
     val focusManager = LocalFocusManager.current
-    val state = musicViewModel.searchState.value
+    val searchState = musicViewModel.searchState.value
+    val state = musicViewModel.state.value
 
     Box(
-        modifier = Modifier.fillMaxWidth()
-            .background(if (state.searchText.isEmpty()) Color.Black.copy(alpha = 0.3f) else Color.Black)
-            .padding(8.dp)
-    ){
+        modifier = Modifier
+            .fillMaxSize()
+            // Transparent if empty → so HomeScreen is visible behind
+            .background(
+                if (searchState.searchText.isEmpty()) Color.Black.copy(alpha = 0.3f)
+                else Color.Black
+            )
+    ) {
         Column(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             SearchBar3(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .background(Color(0XFF353935)),
                 onSearch = { query ->
                     // Handle search query
                     musicViewModel.onEvent(MusicEvent.SearchTextChange(query))
@@ -56,18 +63,38 @@ fun SearchScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            SearchList(
-                modifier = Modifier
-                    .background(
-                        color = if (state.searchText.isEmpty() || state.searchText.isBlank())
-                            Color.Transparent
-                        else MaterialTheme.colorScheme.background
-                    ),
-                musicList = state.musicList,
-                onMusicSelected = {
-                    musicViewModel.onEvent(MusicEvent.OnPlay(it))
+            when{
+                searchState.musicList.isNotEmpty() -> {
+                    SearchList(
+                        modifier = Modifier
+                            .background(
+                                if (searchState.searchText.isEmpty())
+                                    Color.Black.copy(alpha = 0.3f)
+                                else Color.Black
+                            ),
+                        query = searchState.searchText,
+                        musicList = searchState.musicList,
+                        onMusicSelected = {
+                            musicViewModel.onEvent(MusicEvent.OnPlay(it, state.musicFiles))
+                            selectedMusic(it)
+                            onTab()
+                            navController.popBackStack()
+                        }
+                    )
                 }
-            )
+                searchState.searchText.isNotEmpty() && searchState.musicList.isEmpty() -> {
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ){
+                        Text(
+                            text = "No results found",
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = Color.White
+                        )
+                    }
+                }
+            }
         }
     }
 

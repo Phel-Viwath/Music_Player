@@ -8,7 +8,7 @@ import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.model.dto.toFavoriteMusic
-import com.viwath.music_player.domain.use_case.FavoriteUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.FavoriteUseCase
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.state.FavorMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel

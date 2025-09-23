@@ -29,6 +29,18 @@ class MusicRepositoryImp(
     private var cacheAlbum: List<Album> = emptyList()
     private var cacheAlbumSong: Set<Pair<Long, List<Music>>> = emptySet()
 
+    // warning part
+    // delete music from storage
+    override suspend fun deleteMusic(music: Music): Int {
+        return withContext(Dispatchers.IO){
+            context.contentResolver.delete(
+                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                "${MediaStore.Audio.Media._ID}=?",
+                arrayOf(music.id.toString())
+            )
+        }
+    }
+
     override suspend fun getMusicFiles(): List<Music> {
         if (cacheSong.isEmpty()){
             cacheSong = queryMediaStore()

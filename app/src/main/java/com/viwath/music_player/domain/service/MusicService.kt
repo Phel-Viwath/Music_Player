@@ -12,6 +12,7 @@ import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.NotificationCompat
@@ -103,7 +104,7 @@ class MusicService : Service() {
     // ===========================================
 
     private fun setupExoPlayerListener() {
-        exoPlayer.addListener(object : Player.Listener {
+        val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
                 updatePlaybackState()
                 updateMediaMetadata()
@@ -130,7 +131,8 @@ class MusicService : Service() {
                 updatePlaybackState()
                 updateMediaMetadata()
             }
-        })
+        }
+        exoPlayer.addListener(listener)
     }
 
     private fun updateCurrentMusic() {
@@ -150,25 +152,27 @@ class MusicService : Service() {
         updateMediaMetadata()
     }
 
-    private fun createMediaSessionCallback() = object : MediaSessionCompat.Callback() {
-        override fun onPlay() = playMusic()
-        override fun onPause() = pauseMusic()
-        override fun onSkipToNext() = nextMusic()
-        override fun onSkipToPrevious() = previousMusic()
-        override fun onStop() = stopService()
-        override fun onSeekTo(pos: Long) = seekTo(pos)
+    private fun createMediaSessionCallback(): MediaSessionCompat.Callback{
+        return object : MediaSessionCompat.Callback() {
+            override fun onPlay() = playMusic()
+            override fun onPause() = pauseMusic()
+            override fun onSkipToNext() = nextMusic()
+            override fun onSkipToPrevious() = previousMusic()
+            override fun onStop() = stopService()
+            override fun onSeekTo(pos: Long) = seekTo(pos)
 
-        override fun onSetRepeatMode(repeatMode: Int) {
-            exoPlayer.repeatMode = when (repeatMode) {
-                PlaybackStateCompat.REPEAT_MODE_ONE -> ExoPlayer.REPEAT_MODE_ONE
-                PlaybackStateCompat.REPEAT_MODE_ALL,
-                PlaybackStateCompat.REPEAT_MODE_GROUP -> ExoPlayer.REPEAT_MODE_ALL
-                else -> ExoPlayer.REPEAT_MODE_OFF
+            override fun onSetRepeatMode(repeatMode: Int) {
+                exoPlayer.repeatMode = when (repeatMode) {
+                    PlaybackStateCompat.REPEAT_MODE_ONE -> ExoPlayer.REPEAT_MODE_ONE
+                    PlaybackStateCompat.REPEAT_MODE_ALL,
+                    PlaybackStateCompat.REPEAT_MODE_GROUP -> ExoPlayer.REPEAT_MODE_ALL
+                    else -> ExoPlayer.REPEAT_MODE_OFF
+                }
             }
-        }
 
-        override fun onSetShuffleMode(shuffleMode: Int) {
-            exoPlayer.shuffleModeEnabled = shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_ALL
+            override fun onSetShuffleMode(shuffleMode: Int) {
+                exoPlayer.shuffleModeEnabled = shuffleMode == PlaybackStateCompat.SHUFFLE_MODE_ALL
+            }
         }
     }
 
@@ -197,6 +201,27 @@ class MusicService : Service() {
         }
         exoPlayer.play()
         startForegroundService()
+    }
+
+    fun addToPlayNext(music: Music){
+        val currentIndex = exoPlayer.currentMediaItemIndex
+        val mediaItem = MediaItem.fromUri(music.uri)
+
+        exoPlayer.addMediaItem(currentIndex +1, mediaItem)
+        if (playlist.isEmpty()){
+            prepareAndSetSingleTrack(music)
+        }
+        playlist = playlist.toMutableList().apply {
+            add(currentIndex + 1, music)
+        }
+    }
+
+    fun playLast(music: Music){
+        val mediaItem = MediaItem.fromUri(music.uri)
+        exoPlayer.addMediaItem(mediaItem)
+        playlist = playlist.toMutableList().apply {
+            add(music)
+        }
     }
 
     fun pauseMusic() {

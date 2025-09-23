@@ -17,13 +17,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
-import com.viwath.music_player.presentation.ui.screen.component.BottomSheetMusic
+import com.viwath.music_player.presentation.ui.screen.bottom_sheet.BottomSheetMusic
 import com.viwath.music_player.presentation.ui.screen.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
@@ -150,11 +152,18 @@ fun MainApp(
                     )
                 }
 
-                composable(
-                    route = Routes.SearchScreen.route
+                dialog(
+                    route = Routes.SearchScreen.route,
+                    dialogProperties = DialogProperties(usePlatformDefaultWidth = false)
                 ){
                     SearchScreen(
-                        navController = navController
+                        navController = navController,
+                        onTab = {
+                            showMusicDetail = true
+                        },
+                        selectedMusic = {
+                            currentMusic = it
+                        }
                     )
                 }
             }// end nav host

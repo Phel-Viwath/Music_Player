@@ -8,6 +8,10 @@ import com.viwath.music_player.domain.model.PlaylistSong
 import kotlinx.coroutines.flow.Flow
 
 interface MusicRepository {
+
+    //delete music from storage
+    suspend fun deleteMusic(music: Music): Int
+    //
     suspend fun getMusicFiles(): List<Music>
     suspend fun getAlbums(): List<Album>
 

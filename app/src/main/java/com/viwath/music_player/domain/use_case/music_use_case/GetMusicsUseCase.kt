@@ -1,11 +1,11 @@
-package com.viwath.music_player.domain.use_case
+package com.viwath.music_player.domain.use_case.music_use_case
 
 import android.util.Log
 import com.viwath.music_player.core.util.Resource
+import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.core.util.SortOrder
 import com.viwath.music_player.domain.repository.MusicRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -30,7 +30,7 @@ class GetMusicsUseCase @Inject constructor(
                 SortOrder.DATE -> mergedList.sortedBy { it.addDate }
             }
             emit(Resource.Success(musics))
-        }catch (e: Exception){
+        } catch (e: Exception) {
             emit(Resource.Error(e.message ?: "Unknown error"))
         }
     }.flowOn(Dispatchers.IO)

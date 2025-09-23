@@ -8,15 +8,17 @@ import com.viwath.music_player.core.util.MyPrefs
 import com.viwath.music_player.data.data_source.MusicDatabase
 import com.viwath.music_player.data.repository.MusicRepositoryImp
 import com.viwath.music_player.domain.repository.MusicRepository
-import com.viwath.music_player.domain.use_case.AddFavorUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.AddFavorUseCase
 import com.viwath.music_player.domain.use_case.ClearCacheUseCase
-import com.viwath.music_player.domain.use_case.FavoriteUseCase
-import com.viwath.music_player.domain.use_case.GetFavorUseCase
-import com.viwath.music_player.domain.use_case.GetMusicsUseCase
-import com.viwath.music_player.domain.use_case.RemoveFavorUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.FavoriteUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.GetFavorUseCase
+import com.viwath.music_player.domain.use_case.music_use_case.GetMusicsUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.RemoveFavorUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.AlbumUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumMusicUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumsUseCase
+import com.viwath.music_player.domain.use_case.music_use_case.DeleteMusicUseCase
+import com.viwath.music_player.domain.use_case.music_use_case.MusicUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.AddPlaylistSongUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.DeletePlaylistUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.GetAllPlaylistUseCase
@@ -56,11 +58,6 @@ object AppModule {
         return MusicRepositoryImp(context, db.favoriteMusicDao, db.playlistDao)
     }
 
-    @Provides
-    @Singleton
-    fun provideGetMusicsUseCase(
-        repository: MusicRepository
-    ): GetMusicsUseCase = GetMusicsUseCase(repository)
 
     @Provides
     @Singleton
@@ -112,4 +109,12 @@ object AppModule {
         @ApplicationContext context: Context
     ): MyPrefs = MyPrefs(context)
 
+    @Provides
+    @Singleton
+    fun provideMusicUseCase(
+        repository: MusicRepository
+    ): MusicUseCase = MusicUseCase(
+        getMusicsUseCase = GetMusicsUseCase(repository),
+        deleteMusicUseCase = DeleteMusicUseCase(repository)
+    )
 }

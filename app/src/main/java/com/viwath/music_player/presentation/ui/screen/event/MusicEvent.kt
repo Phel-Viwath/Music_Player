@@ -20,6 +20,10 @@ sealed class MusicEvent {
     data object OnRepeatOne: MusicEvent()
     data object OnRepeatAll: MusicEvent()
 
+    data class AddToPlayNext(val music: MusicDto): MusicEvent()
+    data class AddToPlayLast(val music: MusicDto): MusicEvent()
+    data class DeleteMusic(val music: MusicDto): MusicEvent()
+
     data class ShuffleMode(val isShuffle: Boolean): MusicEvent()
     data class OnSeekTo(val position: Long): MusicEvent()
     data class OnPlay(val music: MusicDto, val musics: List<MusicDto> = emptyList()): MusicEvent()

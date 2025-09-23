@@ -1,4 +1,4 @@
-package com.viwath.music_player.domain.use_case
+package com.viwath.music_player.domain.use_case.favorite_use_case
 
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.repository.MusicRepository

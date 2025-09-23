@@ -1,4 +1,4 @@
-package com.viwath.music_player.domain.use_case
+package com.viwath.music_player.domain.use_case.favorite_use_case
 
 data class FavoriteUseCase(
     val addFavorUseCase: AddFavorUseCase,

@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.os.IBinder
+import android.util.Log
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.service.MusicService
 import com.viwath.music_player.domain.service.MusicService.MusicBinder
@@ -82,9 +83,7 @@ class MusicPlayerManager @Inject constructor(
     fun previousMusic() {
         musicService?.previousMusic()
     }
-    fun stopMusic() {
-        musicService?.stopService()
-    }
+
     fun seekTo(position: Long) {
         musicService?.seekTo(position)
     }
@@ -99,6 +98,19 @@ class MusicPlayerManager @Inject constructor(
 
     fun repeatOne(){
         musicService?.repeatOne()
+    }
+
+    fun addToPlayNext(music: Music){
+        musicService?.addToPlayNext(music)
+    }
+
+    fun addToPlayLast(music: Music){
+        musicService?.playLast(music)
+    }
+
+    fun setPlaylist(musicList: List<Music>){
+        Log.d("MusicPlayerManager", "setPlaylist: ${musicList.isNotEmpty()}")
+        musicService?.setPlaylist(musicList)
     }
 
 }
