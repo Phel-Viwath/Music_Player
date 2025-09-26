@@ -20,6 +20,9 @@ interface FavoriteMusicDao {
     @Query("SELECT * FROM favorite_music")
     fun getFavoriteMusic(): Flow<List<FavoriteMusic>>
 
+    @Query("SELECT * FROM favorite_music WHERE id = :id")
+    fun getFavoriteMusicById(id: Long): FavoriteMusic?
+
     @Query("SELECT * FROM favorite_music ORDER BY addDate DESC")
     fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>>
 

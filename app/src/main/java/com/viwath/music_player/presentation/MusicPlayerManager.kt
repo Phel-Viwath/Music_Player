@@ -108,9 +108,6 @@ class MusicPlayerManager @Inject constructor(
         musicService?.playLast(music)
     }
 
-    fun setPlaylist(musicList: List<Music>){
-        Log.d("MusicPlayerManager", "setPlaylist: ${musicList.isNotEmpty()}")
-        musicService?.setPlaylist(musicList)
-    }
+    fun isPlaylistEmpty(): Boolean = musicService?.isPlaylistEmpty() ?: true
 
 }

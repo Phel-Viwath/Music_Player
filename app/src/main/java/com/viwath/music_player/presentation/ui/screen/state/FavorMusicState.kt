@@ -8,5 +8,6 @@ data class FavorMusicState(
     val favorMusicList : List<MusicDto>?= emptyList(),
     val deleteMusic: MusicDto? = null,
     val music: MusicDto? = null,
-    val favoriteId: List<String> = emptyList()
+    val favoriteId: List<String> = emptyList(),
+    val isFavorite: Boolean = false
 )

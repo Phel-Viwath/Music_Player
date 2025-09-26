@@ -27,7 +27,7 @@ import com.viwath.music_player.presentation.ui.screen.music_detail.component.Con
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.ImageContent
 import com.viwath.music_player.presentation.ui.screen.state.FavoriteToggleState
 import com.viwath.music_player.presentation.ui.screen.state.PlayingMode
-import com.viwath.music_player.presentation.viewmodel.FavorMusicViewModel
+import com.viwath.music_player.presentation.viewmodel.FavoriteViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 
 @Composable
@@ -35,7 +35,7 @@ fun MusicDetailScreen(
     modifier: Modifier = Modifier,
     music: MusicDto,
     viewModel: MusicViewModel = hiltViewModel(),
-    favorViewModel: FavorMusicViewModel = hiltViewModel()
+    favorViewModel: FavoriteViewModel = hiltViewModel()
 ){
 
     val playbackState by viewModel.playbackState.collectAsState()

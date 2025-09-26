@@ -136,7 +136,17 @@ fun HomeScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .background(Color.Transparent),
-                                navController = navController
+                                onItemClick = { playlistItem ->
+                                    playlistItem.playlistId?.let { id ->
+                                        navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){
+                                            launchSingleTop = true
+                                        }
+                                    } ?: run {
+                                        navController.navigate(Routes.PlaylistMusicScreen.route + "/0"){
+                                            launchSingleTop = true
+                                        }
+                                    }
+                                }
                             )
                         }
                     }

@@ -88,7 +88,7 @@ class MusicViewModel @Inject constructor(
             is MusicEvent.OnRepeatOne -> repeatOne()
             is MusicEvent.OnRepeatAll -> repeatAll()
 
-            is MusicEvent.AddToPlayNext -> addToPlayNext(event.music)
+            is MusicEvent.AddToPlayNext -> addToPlayNext(event.music, event.musics)
             is MusicEvent.AddToPlayLast -> addToPlayLast(event.music)
             is MusicEvent.DeleteMusic -> deleteMusic(event.music)
 
@@ -96,6 +96,7 @@ class MusicViewModel @Inject constructor(
             is MusicEvent.OnSeekTo -> seekTo(event.position)
             is MusicEvent.OnPlay -> playMusic(event.music, event.musics)
             is MusicEvent.GetOrder -> getOrder()
+
         }
     }
 
@@ -115,11 +116,6 @@ class MusicViewModel @Inject constructor(
                             SortOrder.DURATION -> result.data?.sortedBy { it.duration }
                             SortOrder.DATE -> result.data?.sortedBy { it.addDate }
                         }
-                        data?.let {
-                            musicPlayerManager.setPlaylist(
-                                it.map{ musicDto ->  musicDto.toMusic() }
-                            )
-                        }
                         _state.value = _state.value.copy(isLoading = false, musicFiles = data ?: emptyList())
                     }
                     is Resource.Error -> {
@@ -132,11 +128,11 @@ class MusicViewModel @Inject constructor(
             }
         }
     }
+    
     private fun playMusic(musicDto: MusicDto, musics: List<MusicDto> = emptyList()) {
-        val music = musicDto
         val musics = musics.map { it.toMusic() }
-        _currentMusic.value = music
-        musicPlayerManager.playMusic(music.toMusic(), musics)
+        _currentMusic.value = musicDto
+        musicPlayerManager.playMusic(musicDto.toMusic(), musics)
     }
 
     private fun pauseMusic(): Unit = musicPlayerManager.pauseMusic()
@@ -155,9 +151,24 @@ class MusicViewModel @Inject constructor(
 
     private fun repeatAll(): Unit = musicPlayerManager.repeatAll()
 
-    private fun addToPlayNext(musicDto: MusicDto): Unit = musicPlayerManager.addToPlayNext(musicDto.toMusic())
+    private fun addToPlayNext(musicDto: MusicDto, musics: List<MusicDto> = emptyList()){
+        viewModelScope.launch {
+            val isPlaylistEmpty = musicPlayerManager.isPlaylistEmpty()
+            if (isPlaylistEmpty){
+                playMusic(musicDto, musics)
+                return@launch
+            }
+            musicPlayerManager.addToPlayNext(musicDto.toMusic())
+            _message.emit("Music added to play next")
+        }
+    }
 
-    private fun addToPlayLast(musicDto: MusicDto): Unit = musicPlayerManager.addToPlayLast(musicDto.toMusic())
+    private fun addToPlayLast(musicDto: MusicDto){
+        viewModelScope.launch {
+            musicPlayerManager.addToPlayLast(musicDto.toMusic())
+            _message.emit("Music added to play last")
+        }
+    }
 
 //    fun stopMusic() {
 //        musicPlayerManager.stopMusic()
@@ -180,9 +191,9 @@ class MusicViewModel @Inject constructor(
             _state.value = _state.value.copy(sortOrder = sortOrder)
         }catch (e: Exception){
             Log.e("MusicViewModel", "getOrder: ${e.message}")
+
         }
     }
-
 
     // search
     private fun searchMusic(){

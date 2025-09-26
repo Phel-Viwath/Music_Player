@@ -192,6 +192,8 @@ class MusicService : Service() {
         }
     }
 
+    fun isPlaylistEmpty(): Boolean = playlist.isEmpty()
+
     fun playMusic(music: Music? = null) {
         music?.let {
             currentMusic = it

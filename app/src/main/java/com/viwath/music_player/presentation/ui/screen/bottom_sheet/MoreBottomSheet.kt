@@ -14,10 +14,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.QueuePlayNext
+import androidx.compose.material.icons.filled.Replay
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -27,6 +29,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,8 +43,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
+import com.viwath.music_player.presentation.viewmodel.FavoriteViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -45,11 +57,29 @@ fun ShowBottomSheetMenu(
     isVisible: Boolean,
     musicDto: MusicDto,
     musicViewModel: MusicViewModel = hiltViewModel(),
+    favoriteViewModel: FavoriteViewModel = hiltViewModel(),
+    coroutinesScope: CoroutineScope = rememberCoroutineScope(),
     onDismiss: () -> Unit
 ){
 
     val context = LocalContext.current
+
+    val musicState = musicViewModel.state.value
     val message = musicViewModel.message
+    val favorState = favoriteViewModel.state.value
+    val isFavorite = favorState.isFavorite
+
+    var showPlaylist by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isVisible, musicDto.id){
+        favoriteViewModel.onEvent(FavorEvent.CheckFavorite(musicDto.id))
+    }
+
+    LaunchedEffect(Unit){
+        message.collect { value ->
+            Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
+        }
+    }
 
     MoreBottomSheet(
         isVisible = isVisible,
@@ -59,30 +89,40 @@ fun ShowBottomSheetMenu(
             BottomSheetMenuItem(
                 id = "favorite",
                 title = "Favorite",
-                icon = Icons.Default.Favorite,
+                icon = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                iconTint = if (isFavorite) Color.Green else Color.White,
                 action = {
-                    // Handle delete action
+                    coroutinesScope.launch {
+                        if (!isFavorite) {
+                            favoriteViewModel.onEvent(FavorEvent.PasteInsertData(musicDto))
+                            delay(100)
+                            favoriteViewModel.onEvent(FavorEvent.InsertFavorite)
+                        }
+                        else{
+                            favoriteViewModel.onEvent(FavorEvent.PasteDeleteData(musicDto))
+                            delay(100)
+                            favoriteViewModel.onEvent(FavorEvent.DeleteFavorite)
+                        }
+                        delay(100)
+                        favoriteViewModel.onEvent(FavorEvent.CheckFavorite(musicDto.id))
+                    }
                 }
             ),
             BottomSheetMenuItem(
                 id = "play_next",
                 title = "Play Next",
-                icon = Icons.Default.QueuePlayNext,
+                icon = Icons.Default.ArrowDownward,
                 action = {
-                    musicViewModel.onEvent(MusicEvent.AddToPlayNext(musicDto))
-                    Toast.makeText(context, "Added to play next", Toast.LENGTH_SHORT).show()
+                    musicViewModel.onEvent(MusicEvent.AddToPlayNext(musicDto, musicState.musicFiles))
                     onDismiss()
-                    // Handle delete action
                 }
             ),
             BottomSheetMenuItem(
                 id = "play_last",
                 title = "Play Last",
-                icon = Icons.Default.QueuePlayNext,
+                icon = Icons.Default.Replay,
                 action = {
-                    // Handle delete action
                     musicViewModel.onEvent(MusicEvent.AddToPlayLast(musicDto))
-                    Toast.makeText(context, "Added to play next", Toast.LENGTH_SHORT).show()
                     onDismiss()
                 }
             ),
@@ -91,7 +131,7 @@ fun ShowBottomSheetMenu(
                 title = "Share",
                 icon = Icons.Default.Share,
                 action = {
-                    // Handle delete action
+                    // Handle share action
                 }
             ),
             BottomSheetMenuItem(
@@ -99,7 +139,8 @@ fun ShowBottomSheetMenu(
                 title = "Add to",
                 icon = Icons.Default.Add,
                 action = {
-                    // Handle delete action
+                    // Handle add to action
+                    showPlaylist = true
                 }
             ),
             BottomSheetMenuItem(
@@ -107,7 +148,7 @@ fun ShowBottomSheetMenu(
                 title = "Info",
                 icon = Icons.Default.Info,
                 action = {
-                    // Handle delete action
+                    // Handle info action
                 }
             ),
             BottomSheetMenuItem(
@@ -122,6 +163,12 @@ fun ShowBottomSheetMenu(
             )
         )
     )
+
+    if (showPlaylist)
+        BottomSheetPlaylist(
+            musicDto = musicDto,
+            onDismiss = { showPlaylist = false },
+        )
 }
 
 

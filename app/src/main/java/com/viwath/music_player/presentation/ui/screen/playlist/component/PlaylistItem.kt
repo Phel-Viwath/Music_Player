@@ -37,11 +37,11 @@ import com.viwath.music_player.domain.model.dto.PlaylistDto
 @Composable
 fun PlaylistItem(
     playlistItem: PlaylistDto,
-    onItemClick: () -> Unit
+    onItemClick: (PlaylistDto) -> Unit
 ){
     Log.d("PlaylistItem thumbnail", "PlaylistItem: ${playlistItem.thumbnail}")
     Row(
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onItemClick() },
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp).clickable { onItemClick(playlistItem) },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
     ){

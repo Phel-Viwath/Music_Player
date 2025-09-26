@@ -29,9 +29,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.Playlist
-import com.viwath.music_player.presentation.ui.screen.Routes
+import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.playlist.component.NewPlaylistDialogM3
@@ -42,7 +41,7 @@ import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 fun PlaylistScreen(
     modifier: Modifier = Modifier,
     viewModel: PlaylistViewModel = hiltViewModel(),
-    navController: NavController
+    onItemClick: (PlaylistDto) -> Unit,
 ){
 
     // properties
@@ -68,56 +67,42 @@ fun PlaylistScreen(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .fillMaxHeight()
-            .padding(12.dp)
     ){
-        Column {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.elevatedButtonColors(
-                    containerColor = Color(0xFF6C63FF).copy(alpha = 0.2f),
-                    contentColor = Color.White,
-                ),
-                onClick = { showDialogNewPlaylist = true },
-            ){
-                Icon(
-                    imageVector = Icons.Outlined.Add,
-                    contentDescription = "Add new play",
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    text = "New Playlist",
-                    fontSize = 18.sp,
-                    color = Color.White,
-                    modifier = Modifier.padding(vertical = 6.dp)
-                )
-            }
-
-            ///
-
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            ) {
-                items(state.playlists, key = { "${it.playlistId} ${it.name}" }){ playlistItem ->
-                    PlaylistItem(playlistItem){
-                        // navigate to playlist music
-                        playlistItem.playlistId?.let { id ->
-                            navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){
-                                launchSingleTop = true
-                            }
-                        } ?: run {
-                            navController.navigate(Routes.PlaylistMusicScreen.route + "/0"){
-                                launchSingleTop = true
-                            }
-                        }
-
-                    }
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp)
+        ) {
+            item {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(8.dp),
+                    colors = ButtonDefaults.elevatedButtonColors(
+                        containerColor = Color(0xFF6C63FF).copy(alpha = 0.2f),
+                        contentColor = Color.White,
+                    ),
+                    onClick = { showDialogNewPlaylist = true },
+                ){
+                    Icon(
+                        imageVector = Icons.Outlined.Add,
+                        contentDescription = "Add new play",
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = "New Playlist",
+                        fontSize = 18.sp,
+                        color = Color.White,
+                        modifier = Modifier.padding(vertical = 6.dp)
+                    )
                 }
             }
-        } // end column
+            items(state.playlists, key = { "${it.playlistId} ${it.name}" }){ playlistItem ->
+                PlaylistItem(playlistItem){ playlist ->
+                    // navigate to playlist music
+                    onItemClick(playlist)
+                }
+            }
+        }
 
         NewPlaylistDialogM3 (
             isVisible = showDialogNewPlaylist,

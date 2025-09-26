@@ -21,6 +21,7 @@ interface MusicRepository {
     // favorite
     suspend fun addFavorite(music: FavoriteMusic)
     suspend fun removeFavorite(music: FavoriteMusic)
+    suspend fun getFavoriteMusicById(id: Long): FavoriteMusic?
     fun getFavoriteMusic(): Flow<List<FavoriteMusic>>
     fun getFavoriteMusicByDate(): Flow<List<FavoriteMusic>>
     fun getFavoriteMusicByTitle(): Flow<List<FavoriteMusic>>

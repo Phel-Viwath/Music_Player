@@ -80,6 +80,10 @@ class MusicRepositoryImp(
         favoriteDao.removeFavorite(music)
     }
 
+    override suspend fun getFavoriteMusicById(id: Long): FavoriteMusic? {
+        return favoriteDao.getFavoriteMusicById(id)
+    }
+
     override fun getFavoriteMusic(): Flow<List<FavoriteMusic>> {
         return favoriteDao.getFavoriteMusic()
     }

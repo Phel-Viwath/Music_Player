@@ -17,6 +17,7 @@ import com.viwath.music_player.domain.use_case.favorite_use_case.RemoveFavorUseC
 import com.viwath.music_player.domain.use_case.album_use_case.AlbumUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumMusicUseCase
 import com.viwath.music_player.domain.use_case.album_use_case.GetAlbumsUseCase
+import com.viwath.music_player.domain.use_case.favorite_use_case.GetFavorByIdUseCase
 import com.viwath.music_player.domain.use_case.music_use_case.DeleteMusicUseCase
 import com.viwath.music_player.domain.use_case.music_use_case.MusicUseCase
 import com.viwath.music_player.domain.use_case.playlist_use_case.AddPlaylistSongUseCase
@@ -75,7 +76,8 @@ object AppModule {
     ): FavoriteUseCase = FavoriteUseCase(
         addFavorUseCase = AddFavorUseCase(repository),
         removeFavorUseCase = RemoveFavorUseCase(repository),
-        getFavorUseCase = GetFavorUseCase(repository)
+        getFavorUseCase = GetFavorUseCase(repository),
+        getFavorByIdUseCase = GetFavorByIdUseCase(repository)
     )
 
     @Singleton

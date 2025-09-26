@@ -1,5 +1,6 @@
 package com.viwath.music_player.presentation.viewmodel
 
+import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateSetOf
@@ -12,11 +13,12 @@ import com.viwath.music_player.domain.use_case.favorite_use_case.FavoriteUseCase
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.state.FavorMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class FavorMusicViewModel @Inject constructor(
+class FavoriteViewModel @Inject constructor(
     private val useCase: FavoriteUseCase
 ): ViewModel(){
 
@@ -45,6 +47,8 @@ class FavorMusicViewModel @Inject constructor(
             is FavorEvent.InsertFavorite -> insertFavorite()
             is FavorEvent.AddCurrentFavorite -> addCurrentFavorite(event.id)
             is FavorEvent.RemoveCurrentFavorite -> removeCurrentFavorite(event.id)
+
+            is FavorEvent.CheckFavorite -> checkFavorMusicById(event.id)
         }
     }
 
@@ -68,6 +72,14 @@ class FavorMusicViewModel @Inject constructor(
 
     fun isFavorite(id: String): Boolean {
         return _setOfFavoriteId.contains(id)
+    }
+
+    private fun checkFavorMusicById(id: Long){
+        viewModelScope.launch(Dispatchers.IO) {
+            val music =  useCase.getFavorByIdUseCase(id)
+            Log.d("FavoriteViewModel", "checkFavorMusicById: ${music != null}")
+            _state.value = _state.value.copy(isFavorite = music != null)
+        }
     }
 
     private fun addCurrentFavorite(id: String){
