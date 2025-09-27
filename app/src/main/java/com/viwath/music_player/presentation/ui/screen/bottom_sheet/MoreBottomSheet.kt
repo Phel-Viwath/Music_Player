@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.ui.screen.dialog.DialogInfo
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.viewmodel.FavoriteViewModel
@@ -70,6 +71,7 @@ fun ShowBottomSheetMenu(
     val isFavorite = favorState.isFavorite
 
     var showPlaylist by remember { mutableStateOf(false) }
+    var showInfo by remember { mutableStateOf(false) }
 
     LaunchedEffect(isVisible, musicDto.id){
         favoriteViewModel.onEvent(FavorEvent.CheckFavorite(musicDto.id))
@@ -149,6 +151,7 @@ fun ShowBottomSheetMenu(
                 icon = Icons.Default.Info,
                 action = {
                     // Handle info action
+                    showInfo = true
                 }
             ),
             BottomSheetMenuItem(
@@ -164,11 +167,18 @@ fun ShowBottomSheetMenu(
         )
     )
 
-    if (showPlaylist)
+    if (showPlaylist) {
         BottomSheetPlaylist(
             musicDto = musicDto,
             onDismiss = { showPlaylist = false },
         )
+    }
+
+    if (showInfo){
+        DialogInfo(musicDto){
+            showInfo = false
+        }
+    }
 }
 
 

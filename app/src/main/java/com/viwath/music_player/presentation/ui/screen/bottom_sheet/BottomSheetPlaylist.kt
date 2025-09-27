@@ -1,6 +1,5 @@
 package com.viwath.music_player.presentation.ui.screen.bottom_sheet
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -32,7 +31,7 @@ fun BottomSheetPlaylist(
 ) {
 
     val bottomSheetState = rememberModalBottomSheetState (
-        skipPartiallyExpanded = true
+        skipPartiallyExpanded = false
     )
 
     ModalBottomSheet(
