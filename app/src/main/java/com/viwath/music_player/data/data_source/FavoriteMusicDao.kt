@@ -12,10 +12,10 @@ import kotlinx.coroutines.flow.Flow
 interface FavoriteMusicDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun addFavorite(music: FavoriteMusic)
+    suspend fun addFavorite(music: FavoriteMusic): Long
 
     @Delete
-    suspend fun removeFavorite(music: FavoriteMusic)
+    suspend fun removeFavorite(music: FavoriteMusic): Int
 
     @Query("SELECT * FROM favorite_music")
     fun getFavoriteMusic(): Flow<List<FavoriteMusic>>

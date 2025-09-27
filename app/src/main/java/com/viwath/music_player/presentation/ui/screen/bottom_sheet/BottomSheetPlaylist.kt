@@ -1,5 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.bottom_sheet
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,7 @@ import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetPlaylist(
+    isVisible: Boolean,
     musicDto: MusicDto,
     onDismiss: () -> Unit,
     playlistViewModel: PlaylistViewModel = hiltViewModel(),
@@ -31,40 +33,42 @@ fun BottomSheetPlaylist(
 ) {
 
     val bottomSheetState = rememberModalBottomSheetState (
-        skipPartiallyExpanded = false
+        skipPartiallyExpanded = true
     )
 
-    ModalBottomSheet(
-        onDismissRequest = onDismiss,
-        sheetState = bottomSheetState,
-        shape = RectangleShape
-    ){
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalAlignment = Alignment.Start,
-        ) {
-            IconButton(onClick = onDismiss){
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Back"
+    if (isVisible){
+        ModalBottomSheet(
+            onDismissRequest = onDismiss,
+            sheetState = bottomSheetState
+        ){
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.Top
+            ) {
+                IconButton(onClick = onDismiss){
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Back"
+                    )
+                }
+                PlaylistScreen(
+                    modifier = Modifier.fillMaxWidth(),
+                    onItemClick = { playlistDto ->
+                        if (playlistDto.playlistId == 0L){
+                            favoriteViewModel.onEvent(FavorEvent.PasteInsertData(musicDto))
+                            favoriteViewModel.onEvent(FavorEvent.InsertFavorite)
+                            onDismiss()
+                        }else{
+                            playlistViewModel.onEvent(PlaylistEvent.AddPlaylistSong(listOf(musicDto)))
+                            onDismiss()
+                        }
+
+                    }
                 )
             }
-            PlaylistScreen(
-                modifier = Modifier.fillMaxWidth(),
-                onItemClick = { playlistDto ->
-                    if (playlistDto.playlistId == 0L){
-                        favoriteViewModel.onEvent(FavorEvent.PasteInsertData(musicDto))
-                        favoriteViewModel.onEvent(FavorEvent.InsertFavorite)
-                        onDismiss()
-                    }else{
-                        playlistViewModel.onEvent(PlaylistEvent.AddPlaylistSong(listOf(musicDto)))
-                        onDismiss()
-                    }
 
-                }
-            )
         }
-
     }
 
 }

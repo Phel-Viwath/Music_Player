@@ -67,6 +67,7 @@ fun ShowBottomSheetMenu(
 
     val musicState = musicViewModel.state.value
     val message = musicViewModel.message
+    val favoriteMessage = favoriteViewModel.message
     val favorState = favoriteViewModel.state.value
     val isFavorite = favorState.isFavorite
 
@@ -79,6 +80,12 @@ fun ShowBottomSheetMenu(
 
     LaunchedEffect(Unit){
         message.collect { value ->
+            Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit){
+        favoriteMessage.collect { value ->
             Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
         }
     }
@@ -167,18 +174,17 @@ fun ShowBottomSheetMenu(
         )
     )
 
-    if (showPlaylist) {
-        BottomSheetPlaylist(
-            musicDto = musicDto,
-            onDismiss = { showPlaylist = false },
-        )
-    }
+    BottomSheetPlaylist(
+        isVisible = showPlaylist,
+        musicDto = musicDto,
+        onDismiss = { showPlaylist = false },
+    )
 
-    if (showInfo){
-        DialogInfo(musicDto){
-            showInfo = false
-        }
-    }
+    DialogInfo(
+        isVisible = showInfo,
+        musicDto = musicDto,
+        onDismiss = { showInfo = false }
+    )
 }
 
 

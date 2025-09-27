@@ -19,6 +19,8 @@ import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.state.PlaylistState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -35,6 +37,9 @@ class PlaylistViewModel @Inject constructor(
 
     private val _currentMusic = mutableStateOf<MusicDto?>(null)
     val currentMusic: State<MusicDto?> get() = _currentMusic
+
+    private val _message = MutableSharedFlow<String>()
+    val message get() = _message.asSharedFlow()
 
     init {
         viewModelScope.launch {
@@ -93,21 +98,23 @@ class PlaylistViewModel @Inject constructor(
 
     private fun newPlaylist(){
         val playlist = _state.value.playlist
-        if (playlist == null){
-            _state.value = _state.value.copy(error = "Playlist is null")
-            return
-        }
         viewModelScope.launch {
+            if (playlist == null){
+                _message.emit("Playlist is null")
+                return@launch
+            }
             useCase.newPlaylistUseCase(playlist).collect {
                 when(it){
                     is Resource.Loading -> {
                         _state.value = _state.value.copy(isLoading = true)
                     }
                     is Resource.Success -> {
-                        _state.value = _state.value.copy(isLoading = false, success = "New playlist created.")
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit("New playlist created")
                     }
                     is Resource.Error -> {
-                        _state.value = _state.value.copy(isLoading = false, error = it.message!!)
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(it.message.toString())
                     }
                 }
             }
@@ -117,11 +124,11 @@ class PlaylistViewModel @Inject constructor(
 
     private fun deletePlaylist(){
         val playlist = _state.value.playlist
-        if (playlist == null){
-            _state.value = _state.value.copy(error = "Playlist is null")
-            return
-        }
         viewModelScope.launch {
+            if (playlist == null){
+                _message.emit("Playlist is null")
+                return@launch
+            }
             useCase.deletePlaylistUseCase(playlist).collect {
                 Log.d("PlaylistViewModel", "deletePlaylist: $it")
                 when(it){
@@ -129,10 +136,12 @@ class PlaylistViewModel @Inject constructor(
                         _state.value = _state.value.copy(isLoading = true)
                     }
                     is Resource.Success -> {
-                        _state.value = _state.value.copy(isLoading = false, success = "Playlist deleted")
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit("Playlist deleted")
                     }
                     is Resource.Error -> {
-                        _state.value = _state.value.copy(isLoading = false, error = it.message!!)
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(it.message.toString())
                     }
                 }
             }
@@ -142,20 +151,17 @@ class PlaylistViewModel @Inject constructor(
     /// MusicPlaylist
 
     private fun loadPlaylistSong(){
-        Log.d("PlaylistViewModel","loadPlaylistSong")
         var playlistId: Long? = null
-        savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.let { id ->
-            Log.d("PlaylistViewModel", "playlistId:$id")
-            playlistId = id.toLong()
-        }
-        if (playlistId == null){
-            _state.value = _state.value.copy(
-                error = "Invalid playlist ID",
-                isLoading = false
-            )
-            return
-        }
+
         viewModelScope.launch {
+            savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.let { id ->
+                Log.d("PlaylistViewModel", "playlistId:$id")
+                playlistId = id.toLong()
+            }
+            if (playlistId == null){
+                _message.emit("Playlist Id is null")
+                return@launch
+            }
             if (playlistId == 0L){
                 val favoriteSong = getAllFavoriteMusic(_state.value.sortOrder)
                 _state.value = _state.value.copy(
@@ -176,10 +182,8 @@ class PlaylistViewModel @Inject constructor(
                     }
                     is Resource.Error<*> -> {
                         Log.e("PlaylistViewModel", "loadPlaylistSong error: ${result.message}")
-                        _state.value = _state.value.copy(
-                            error = result.message ?: "Unknown error",
-                            isLoading = false
-                        )
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(result.message ?: "Unknown error")
                     }
                 }
             }
@@ -189,25 +193,23 @@ class PlaylistViewModel @Inject constructor(
 
     private fun addPlaylistSong(musicList: List<MusicDto>){
         var playlistId: Long? = null
-        savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.let { id ->
-            Log.d( "PlaylistViewmodel", "addPlaylistSong: playlist id is $id")
-            playlistId = id.toLong()
-        }
-        if (playlistId == null || playlistId == 0L){
-            _state.value = _state.value.copy(error = "Playlist Id is null")
-            return
-        }
-
-        val playlistSong = musicList.mapIndexed { index, dto ->
-            PlaylistSong(
-                playlistId = playlistId,
-                musicId = dto.id.toString(),
-                musicUri = if (index == musicList.size - 1) dto.imagePath ?: "" else "",
-            )
-        }
-
-        Log.d("PlaylistViewModel", "addPlaylistSong: $playlistSong")
         viewModelScope.launch {
+            savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.let { id ->
+                Log.d( "PlaylistViewmodel", "addPlaylistSong: playlist id is $id")
+                playlistId = id.toLong()
+            }
+            if (playlistId == null || playlistId == 0L){
+                _message.emit("Invalid playlist ID")
+                return@launch
+            }
+
+            val playlistSong = musicList.mapIndexed { index, dto ->
+                PlaylistSong(
+                    playlistId = playlistId,
+                    musicId = dto.id.toString(),
+                    musicUri = if (index == musicList.size - 1) dto.imagePath ?: "" else "",
+                )
+            }
             useCase.addPlaylistSongUseCase(
                 playlistSong
             ).collect{ result ->
@@ -217,23 +219,61 @@ class PlaylistViewModel @Inject constructor(
                         _state.value = _state.value.copy(isLoading = true)
                     }
                     is Resource.Error<*> -> {
-                        _state.value = _state.value.copy(error = result.message ?: "Unknown error", isLoading = false)
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(result.message ?: "Unknown error")
                     }
                     is Resource.Success<*> -> {
-                        _state.value = _state.value.copy(success = "Music added to playlist", isLoading = false)
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit("Music added to playlist")
                     }
                 }
             }
         }
     }
 
-    private fun loadPlaylist(){
-        val id = savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.toLong()
-        if (id == null){
-            _state.value = _state.value.copy(error = "Invalid playlist ID")
-            return
-        }
+    private fun addPlaylistSong(musicList: List<MusicDto>, playlistId: Long){
         viewModelScope.launch {
+            if (playlistId == 0L){
+                _message.emit("Invalid playlist ID")
+                return@launch
+            }
+
+            val playlistSong = musicList.mapIndexed { index, dto ->
+                PlaylistSong(
+                    playlistId = playlistId,
+                    musicId = dto.id.toString(),
+                    musicUri = if (index == musicList.size - 1) dto.imagePath ?: "" else "",
+                )
+            }
+            useCase.addPlaylistSongUseCase(
+                playlistSong
+            ).collect{ result ->
+                Log.d("PlaylistViewModel", "addPlaylistSong: $result")
+                when(result){
+                    is Resource.Loading<*> -> {
+                        _state.value = _state.value.copy(isLoading = true)
+                    }
+                    is Resource.Error<*> -> {
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(result.message ?: "Unknown error")
+                    }
+                    is Resource.Success<*> -> {
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit("Music added to playlist")
+                    }
+                }
+            }
+        }
+    }
+
+
+    private fun loadPlaylist(){
+        viewModelScope.launch {
+            val id = savedStateHandle.get<String>(Constant.PLAYLIST_ID)?.toLong()
+            if (id == null){
+                _message.emit("Invalid playlist ID")
+                return@launch
+            }
             if (id == 0L){
                 return@launch
             }
@@ -247,11 +287,8 @@ class PlaylistViewModel @Inject constructor(
                         )
                     }
                     is Resource.Error<*> -> {
-                        Log.e("PlaylistViewModel", "loadPlaylist: ${result.message}")
-                        _state.value = _state.value.copy(
-                            error = result.message ?: "Unknown error",
-                            isLoading = false
-                        )
+                        _state.value = _state.value.copy(isLoading = false)
+                        _message.emit(result.message ?: "Unknown error")
                     }
                 }
             }
@@ -264,7 +301,7 @@ class PlaylistViewModel @Inject constructor(
             when(result){
                 is Resource.Error -> {
                     Log.e("PlaylistViewModel", "getAllFavoriteMusic: ${result.message}")
-                    _state.value = _state.value.copy(error = result.message ?: "Unknown error")
+                    _message.emit(result.message ?: "Unknown error")
                 }
                 is Resource.Loading -> {}
                 is Resource.Success -> {

@@ -104,7 +104,7 @@ fun HomeScreen(
                         .background(Color.Transparent)
                 ) {
                     TabBar(
-                        modifier = Modifier.background(Color.Transparent),
+                        modifier = Modifier.background(Color.Transparent).padding(horizontal = 6.dp),
                         selectedTabIndex = selectedTab,
                         onTabSelected = {
                             scope.launch {
@@ -135,7 +135,8 @@ fun HomeScreen(
                             2 -> PlaylistScreen(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .background(Color.Transparent),
+                                    .background(Color.Transparent)
+                                    .padding(12.dp),
                                 onItemClick = { playlistItem ->
                                     playlistItem.playlistId?.let { id ->
                                         navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){

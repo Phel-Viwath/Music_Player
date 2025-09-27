@@ -14,6 +14,8 @@ import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.state.FavorMusicState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -26,6 +28,9 @@ class FavoriteViewModel @Inject constructor(
     val state: State<FavorMusicState> get() = _state
 
     private val _setOfFavoriteId = mutableStateSetOf<String?>()
+
+    private val _message = MutableSharedFlow<String>()
+    val message get() = _message.asSharedFlow()
 
     init {
         loadFavorMusicList(SortOrder.DATE)
@@ -99,7 +104,17 @@ class FavoriteViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            useCase.addFavorUseCase(favoriteMusic)
+            useCase.addFavorUseCase(favoriteMusic).collect { result ->
+                when(result){
+                    is Resource.Loading -> {}
+                    is Resource.Error -> {
+                        _message.emit("${result.message}")
+                    }
+                    is Resource.Success -> {
+                        _message.emit("Favorite added successfully")
+                    }
+                }
+            }
         }
     }
 
@@ -110,7 +125,17 @@ class FavoriteViewModel @Inject constructor(
             return
         }
         viewModelScope.launch {
-            useCase.removeFavorUseCase(favorMusic)
+            useCase.removeFavorUseCase(favorMusic).collect {
+                when(it){
+                    is Resource.Loading -> {}
+                    is Resource.Error -> {
+                        _message.emit("${it.message}")
+                    }
+                    is Resource.Success -> {
+                        _message.emit("Favorite removed successfully")
+                    }
+                }
+            }
         }
     }
 

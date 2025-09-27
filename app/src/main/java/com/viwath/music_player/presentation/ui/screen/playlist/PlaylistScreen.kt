@@ -2,9 +2,7 @@ package com.viwath.music_player.presentation.ui.screen.playlist
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -64,10 +62,7 @@ fun PlaylistScreen(
     }
 
     // Layout
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-    ){
+    Box(modifier = modifier.fillMaxWidth()){
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

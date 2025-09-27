@@ -18,31 +18,32 @@ import com.viwath.music_player.domain.model.dto.MusicDto
 
 @Composable
 fun DialogInfo(
+    isVisible: Boolean,
     musicDto: MusicDto,
     onDismiss: () -> Unit
 ) {
-
-    AlertDialog(
-        onDismissRequest = { onDismiss() },
-        confirmButton = {},
-        title = {
-            Text(text = "Info")
-        },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
-                InfoItem(label = "Name", value = musicDto.title)
-                InfoItem(label = "Artist", value = musicDto.artist)
-                InfoItem(label = "Album", value = musicDto.album)
-                InfoItem(label = "Duration", value = "${musicDto.duration}")
-                InfoItem(label = "Add date", value = musicDto.addDate)
-                InfoItem(label = "Path", value = musicDto.uri.substringBeforeLast("/"), isLast = true)
+    if (isVisible){
+        AlertDialog(
+            onDismissRequest = { onDismiss() },
+            confirmButton = {},
+            title = {
+                Text(text = "Info")
+            },
+            text = {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.Start
+                ) {
+                    InfoItem(label = "Name", value = musicDto.title)
+                    InfoItem(label = "Artist", value = musicDto.artist)
+                    InfoItem(label = "Album", value = musicDto.album)
+                    InfoItem(label = "Duration", value = "${musicDto.duration}")
+                    InfoItem(label = "Add date", value = musicDto.addDate)
+                    InfoItem(label = "Path", value = musicDto.uri.substringBeforeLast("/"), isLast = true)
+                }
             }
-        }
-    )
-
+        )
+    }
 }
 
 @Composable

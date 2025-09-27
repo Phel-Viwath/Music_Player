@@ -72,12 +72,12 @@ class MusicRepositoryImp(
     }
     // Favorite
 
-    override suspend fun addFavorite(music: FavoriteMusic) {
-        favoriteDao.addFavorite(music)
+    override suspend fun addFavorite(music: FavoriteMusic): Long {
+        return favoriteDao.addFavorite(music)
     }
 
-    override suspend fun removeFavorite(music: FavoriteMusic) {
-        favoriteDao.removeFavorite(music)
+    override suspend fun removeFavorite(music: FavoriteMusic): Int {
+        return favoriteDao.removeFavorite(music)
     }
 
     override suspend fun getFavoriteMusicById(id: Long): FavoriteMusic? {
