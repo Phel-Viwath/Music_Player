@@ -29,8 +29,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.domain.model.Playlist
 import com.viwath.music_player.domain.model.dto.PlaylistDto
-import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
+import com.viwath.music_player.presentation.ui.screen.dialog.AppDialog
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
+import com.viwath.music_player.presentation.ui.screen.event.ResultMsg
 import com.viwath.music_player.presentation.ui.screen.playlist.component.NewPlaylistDialogM3
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistItem
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
@@ -47,20 +48,25 @@ fun PlaylistScreen(
     val dialogTitle = "V-Music"
     val state = viewModel.state.value
 
+    var errorMessage by remember { mutableStateOf("") }
+
     var showDialogNewPlaylist by remember { mutableStateOf(false) }
     var showMessageDialog by remember { mutableStateOf(false) }
 
     // side-effect
-    LaunchedEffect(state.error){
-        if (state.error.isNotBlank())
-           showMessageDialog = true
+    LaunchedEffect(Unit){
+        viewModel.message.collect { result ->
+            when(result){
+                is ResultMsg.Error -> {
+                    errorMessage = result.message
+                    showMessageDialog = true
+                }
+                is ResultMsg.Success -> {
+                    Toast.makeText(context, result.message, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
     }
-
-    LaunchedEffect(state.success){
-        if (state.success.isNotBlank())
-            Toast.makeText(context, state.success, Toast.LENGTH_SHORT).show()
-    }
-
     // Layout
     Box(modifier = modifier.fillMaxWidth()){
         LazyColumn(
@@ -116,12 +122,12 @@ fun PlaylistScreen(
 
 
     // show dialog message
-    if (showMessageDialog){
-        Dialog(
-            dialogTitle,
-            state.error,
-            onDismissRequest = {showMessageDialog = false}
-        )
-    }
+    AppDialog(
+        showDialog = showMessageDialog,
+        title = dialogTitle,
+        message = errorMessage,
+        confirmText = "OK",
+        onDismissRequest = { showMessageDialog = false }
+    )
 
 }

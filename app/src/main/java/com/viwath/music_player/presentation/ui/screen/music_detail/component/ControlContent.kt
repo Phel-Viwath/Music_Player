@@ -43,6 +43,7 @@ fun ControlContent(
     onNextClick: () -> Unit,
     onPlayPauseClick: () -> Unit,
     onRepeatClick: () -> Unit,
+    onMoreClick: () -> Unit
 ){
     val favoriteIcon = if (favoriteToggleState == FavoriteToggleState.FAVORITE)
         Icons.Default.Favorite
@@ -193,7 +194,7 @@ fun ControlContent(
 
                 // more
                 IconButton(
-                    onClick = {},
+                    onClick = onMoreClick,
                     modifier = Modifier.size(56.dp)
                 ) {
                     Icon(

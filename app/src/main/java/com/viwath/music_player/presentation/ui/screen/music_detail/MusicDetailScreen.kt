@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.ui.screen.bottom_sheet.BottomSheetPlaylist
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.ControlContent
@@ -43,6 +44,7 @@ fun MusicDetailScreen(
     var isFavorite by remember(music.id) { mutableStateOf(music.isFavorite) }
     var isCurrentFavorite by remember { mutableStateOf(false) }
     val currentMusicFavorite = favorViewModel.isFavorite(currentMusic.id.toString())
+    var showMoreMenu by remember { mutableStateOf(false) }
 
 
     LaunchedEffect(music) {
@@ -132,10 +134,19 @@ fun MusicDetailScreen(
                     if (!playbackState.isPlaying)
                         viewModel.onEvent(MusicEvent.OnPlay(currentMusic))
                     else viewModel.onEvent(MusicEvent.OnPause)
+                },
+                onMoreClick = {
+                    showMoreMenu = true
                 }
             )
 
         }
     }
+
+    BottomSheetPlaylist(
+        isVisible = showMoreMenu,
+        musicDto = currentMusic,
+        onDismiss = { showMoreMenu = false }
+    )
 
 }

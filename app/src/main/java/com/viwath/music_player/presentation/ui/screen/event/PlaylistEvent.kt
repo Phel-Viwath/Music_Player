@@ -13,6 +13,6 @@ sealed class PlaylistEvent {
 
     data class NewPlaylist(val playlist: Playlist): PlaylistEvent()
     data class DeletePlaylist(val playlist: Playlist): PlaylistEvent()
-    data class AddPlaylistSong(val musicList: List<MusicDto>): PlaylistEvent()
+    data class AddPlaylistSong(val musicList: List<MusicDto>, val playlistId: Long? = null): PlaylistEvent()
     data class SortPlaylistSong(val sortOrder: SortOrder): PlaylistEvent()
 }

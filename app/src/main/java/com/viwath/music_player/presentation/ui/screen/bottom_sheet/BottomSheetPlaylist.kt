@@ -13,7 +13,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
@@ -60,7 +59,7 @@ fun BottomSheetPlaylist(
                             favoriteViewModel.onEvent(FavorEvent.InsertFavorite)
                             onDismiss()
                         }else{
-                            playlistViewModel.onEvent(PlaylistEvent.AddPlaylistSong(listOf(musicDto)))
+                            playlistViewModel.onEvent(PlaylistEvent.AddPlaylistSong(listOf(musicDto), playlistDto.playlistId))
                             onDismiss()
                         }
 
