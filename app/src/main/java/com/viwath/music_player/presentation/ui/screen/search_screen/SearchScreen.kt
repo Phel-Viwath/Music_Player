@@ -50,7 +50,7 @@ fun SearchScreen(
         ) {
             SearchBar3(
                 modifier = Modifier.fillMaxWidth()
-                    .background(Color(0XFF353935)),
+                    .background(Color(0xFF1A0B3D)),
                 onSearch = { query ->
                     // Handle search query
                     musicViewModel.onEvent(MusicEvent.SearchTextChange(query))

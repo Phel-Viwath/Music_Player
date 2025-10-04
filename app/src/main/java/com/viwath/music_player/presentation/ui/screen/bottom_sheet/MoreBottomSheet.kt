@@ -74,6 +74,13 @@ fun ShowBottomSheetMenu(
     var showPlaylist by remember { mutableStateOf(false) }
     var showInfo by remember { mutableStateOf(false) }
 
+    // Observe messages
+    LaunchedEffect(Unit){
+        musicViewModel.message.collect { value ->
+            Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
+        }
+    }
+
     LaunchedEffect(isVisible, musicDto.id){
         favoriteViewModel.onEvent(FavorEvent.CheckFavorite(musicDto.id))
     }
@@ -87,6 +94,12 @@ fun ShowBottomSheetMenu(
     LaunchedEffect(Unit){
         favoriteMessage.collect { value ->
             Toast.makeText(context, value, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    LaunchedEffect(Unit){
+        musicViewModel.deleteResult.collect { result ->
+            Toast.makeText(context, result, Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -2,16 +2,20 @@
 
 package com.viwath.music_player.presentation.viewmodel
 
+import android.content.IntentSender
 import android.util.Log
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.viwath.music_player.core.util.DeleteResult
 import com.viwath.music_player.core.util.MyPrefs
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.toMusic
+import com.viwath.music_player.domain.use_case.ClearCacheUseCase
 import com.viwath.music_player.domain.use_case.music_use_case.MusicUseCase
 import com.viwath.music_player.presentation.MusicPlayerManager
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
@@ -21,6 +25,7 @@ import com.viwath.music_player.presentation.ui.screen.state.SearchState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -31,6 +36,7 @@ import javax.inject.Inject
 class MusicViewModel @Inject constructor(
     private val musicPlayerManager: MusicPlayerManager,
     private val useCase: MusicUseCase,
+    private val clearCacheUseCase: ClearCacheUseCase,
     private val myPrefs: MyPrefs
 ): ViewModel(){
     private val _state = mutableStateOf(MusicState())
@@ -46,7 +52,18 @@ class MusicViewModel @Inject constructor(
     val searchState: State<SearchState> get() = _searchState
 
     private val _message = MutableSharedFlow<String>()
-    val message = _message.asSharedFlow()
+    val message get() = _message.asSharedFlow()
+
+    private val _deletePermissionIntent = MutableStateFlow<IntentSender?>(null)
+    val deletePermissionIntent get() = _deletePermissionIntent.asStateFlow()
+
+    // Delete result state
+    private val _deleteResult = MutableSharedFlow<String>()
+    val deleteResult: SharedFlow<String?> = _deleteResult
+
+    // Keep track of music to delete after permission
+    private var pendingDeleteMusic: Music? = null
+
 
     init {
         musicPlayerManager.bindService()
@@ -91,6 +108,12 @@ class MusicViewModel @Inject constructor(
             is MusicEvent.AddToPlayNext -> addToPlayNext(event.music, event.musics)
             is MusicEvent.AddToPlayLast -> addToPlayLast(event.music)
             is MusicEvent.DeleteMusic -> deleteMusic(event.music)
+            is MusicEvent.OnDeletePermissionGranted -> {
+                // Retry deletion after permission granted
+                pendingDeleteMusic?.let { music ->
+                    retryDeleteMusic(music)
+                }
+            }
 
             is MusicEvent.ShuffleMode -> shuffleMode(event.isShuffle)
             is MusicEvent.OnSeekTo -> seekTo(event.position)
@@ -108,7 +131,6 @@ class MusicViewModel @Inject constructor(
     private fun loadMusicFiles(){
         viewModelScope.launch {
             useCase.getMusicsUseCase(SortOrder.TITLE).collect { result ->
-                Log.d("MusicViewModel", "loadMusicFiles: $result")
                 when(result){
                     is Resource.Success -> {
                         val data = when(_state.value.sortOrder){
@@ -215,19 +237,77 @@ class MusicViewModel @Inject constructor(
         }
     }
 
-    private fun deleteMusic(music: MusicDto){
+    private fun deleteMusic(musicDto: MusicDto) {
+        val music = musicDto.toMusic()
         viewModelScope.launch {
-            useCase.deleteMusicUseCase(music.toMusic()).collect{ result ->
-                when(result){
+            useCase.deleteMusicUseCase(music).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        //_deleteResult.emit("Deleting...")
+                    }
+
                     is Resource.Success -> {
-                        _message.emit("Music deleted successfully")
+                        val result = resource.data!!
+                        Log.d("MusicViewModel", "deleteMusic: $result")
+                        when (result) {
+                            is DeleteResult.NeedPermission -> {
+                                // Store music for retry after permission
+                                _deleteResult.emit("Need permission")
+                                pendingDeleteMusic = music
+                                // Trigger permission request
+                                Log.d("MusicViewModel", "deleteMusic: intent sender ${result.intentSender}")
+                                _deletePermissionIntent.value = result.intentSender
+                            }
+                            is DeleteResult.Success -> {
+                                Log.d("MusicViewModel", "deleteMusic: Delete Success")
+                                _deleteResult.emit("Deleted successfully")
+                                pendingDeleteMusic = null
+                                _deletePermissionIntent.value = null
+                                clearCacheAndReload()
+                            }
+                        }
                     }
-                    is Resource.Error<*> -> {
-                        _message.emit(result.message ?: "Unknown error")
+
+                    is Resource.Error -> {
+                        Log.d("MusicViewModel", "deleteMusic: ${resource.message}")
+                        _deleteResult.emit(resource.message ?: "Failed to delete")
+                        pendingDeleteMusic = null
+                        _deletePermissionIntent.value = null
                     }
-                    is Resource.Loading<*> -> {}
                 }
             }
+        }
+    }
+
+    private fun retryDeleteMusic(music: Music) {
+        viewModelScope.launch {
+            useCase.deleteMusicUseCase.executeDelete(music).collect { resource ->
+                when (resource) {
+                    is Resource.Loading -> {
+                        _deleteResult.emit("Deleting...")
+                    }
+
+                    is Resource.Success -> {
+                        _deleteResult.emit("Deleted successfully")
+                        pendingDeleteMusic = null
+                        _deletePermissionIntent.value = null
+                        clearCacheAndReload()
+                    }
+
+                    is Resource.Error -> {
+                        _deleteResult.emit(resource.message ?: "Failed to delete")
+                        pendingDeleteMusic = null
+                        _deletePermissionIntent.value = null
+                    }
+                }
+            }
+        }
+    }
+
+    private fun clearCacheAndReload() {
+        viewModelScope.launch {
+            clearCacheUseCase()
+            loadMusicFiles()
         }
     }
 

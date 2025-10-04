@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 @Composable
 fun AppDialog(
     showDialog: Boolean,
-    title: String,
+    title: String?,
     message: String,
     confirmText: String,
     onDismissRequest: () -> Unit
@@ -25,7 +25,7 @@ fun AppDialog(
                 )
             },
             title = {
-                Text(text = title)
+                Text(text = title ?: "V-Music")
             },
             text = {
                 Text(text = message)

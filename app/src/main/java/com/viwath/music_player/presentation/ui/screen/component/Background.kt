@@ -133,7 +133,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♪",
             size = 200.sp,
             rotation = -15f,
-            alpha = 0.3f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -143,7 +143,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♫",
             size = 150.sp,
             rotation = 25f,
-            alpha = 0.25f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -153,7 +153,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♬",
             size = 120.sp,
             rotation = 45f,
-            alpha = 0.2f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -163,7 +163,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♭",
             size = 180.sp,
             rotation = -30f,
-            alpha = 0.35f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -173,7 +173,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♯",
             size = 100.sp,
             rotation = 60f,
-            alpha = 0.15f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -183,7 +183,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♩",
             size = 160.sp,
             rotation = -45f,
-            alpha = 0.28f
+            alpha = 0.09f
         )
 
         drawMusicalNote(
@@ -193,7 +193,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♪",
             size = 140.sp,
             rotation = 15f,
-            alpha = 0.22f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -203,7 +203,7 @@ fun AmbientGradientBackground(
             noteSymbol = "𝄞",
             size = 110.sp,
             rotation = -60f,
-            alpha = 0.18f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -213,7 +213,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♫",
             size = 90.sp,
             rotation = 30f,
-            alpha = 0.12f
+            alpha = 0.1f
         )
 
         // Add some smaller notes for depth
@@ -245,7 +245,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♪",
             size = 95.sp,
             rotation = 20f,
-            alpha = 0.16f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -255,7 +255,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♩",
             size = 130.sp,
             rotation = -50f,
-            alpha = 0.24f
+            alpha = 0.1f
         )
 
         drawMusicalNote(
@@ -265,7 +265,7 @@ fun AmbientGradientBackground(
             noteSymbol = "♭",
             size = 75.sp,
             rotation = 85f,
-            alpha = 0.14f
+            alpha = 0.1f
         )
     }
 }

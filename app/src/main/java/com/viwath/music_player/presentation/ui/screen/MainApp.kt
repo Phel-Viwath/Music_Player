@@ -26,6 +26,7 @@ import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
 import com.viwath.music_player.presentation.ui.screen.bottom_sheet.BottomSheetMusic
+import com.viwath.music_player.presentation.ui.screen.bottom_sheet.ShowBottomSheetMenu
 import com.viwath.music_player.presentation.ui.screen.component.MiniPlayer
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.playlist.component.MusicPicker
@@ -63,6 +64,7 @@ fun MainApp(
     var currentMusic by remember { mutableStateOf<MusicDto?>(null) }
     var showMusicDetail by remember { mutableStateOf(false) }
     var homeInitialTab by remember { mutableIntStateOf(0) }
+    var selectedMusicForMenu by remember { mutableStateOf<MusicDto?>(null) }
 
     Box (
         modifier = Modifier.fillMaxSize()
@@ -123,7 +125,10 @@ fun MainApp(
                             currentMusic = selectedMusic
                             showMusicDetail = true
                         },
-                        navController = navController
+                        navController = navController,
+                        onMenuClick = { musicDto ->
+                            selectedMusicForMenu = musicDto
+                        }
                     )
                 }
 
@@ -148,6 +153,9 @@ fun MainApp(
                         onMusicSelected = { selectedMusic ->
                             currentMusic = selectedMusic
                             showMusicDetail = true
+                        },
+                        onMenuClick = { musicDto ->
+                            selectedMusicForMenu = musicDto
                         }
                     )
                 }
@@ -177,6 +185,15 @@ fun MainApp(
             currentMusic = currentMusic!!,
             musicViewModel = musicViewModel,
             onDismiss = { showMusicDetail = it }
+        )
+    }
+
+    selectedMusicForMenu?.let { musicDto ->
+        ShowBottomSheetMenu(
+            isVisible = true,
+            musicDto = musicDto,
+            musicViewModel = musicViewModel,
+            onDismiss = { selectedMusicForMenu = null }
         )
     }
 

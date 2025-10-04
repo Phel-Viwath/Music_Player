@@ -51,6 +51,7 @@ import com.viwath.music_player.R
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
+import com.viwath.music_player.presentation.ui.screen.event.ResultMsg
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
@@ -74,21 +75,20 @@ fun MusicPicker(
         isCheckAll = checkCount == musicList.size && musicList.isNotEmpty()
     }
 
-    val state = playlistViewModel.state.value
-    LaunchedEffect(state.success){
-        if (state.success.isNotEmpty()){
-            Toast.makeText(context, state.success, Toast.LENGTH_SHORT).show()
-            navController.popBackStack()
+    LaunchedEffect(Unit){
+        playlistViewModel.message.collect { resultMsg ->
+            when(resultMsg){
+                is ResultMsg.Error -> {
+                    Log.e("MusicPicker", "MusicPicker: ${resultMsg.message}")
+                    Toast.makeText(context, resultMsg.message, Toast.LENGTH_SHORT).show()
+                }
+                is ResultMsg.Success -> {
+                    Toast.makeText(context, resultMsg.message, Toast.LENGTH_SHORT).show()
+                    navController.popBackStack()
+                }
+            }
         }
     }
-
-    LaunchedEffect(state.error){
-        if (state.error.isNotEmpty()){
-            Log.e("MusicPicker", "MusicPicker: ${state.error}")
-            Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
-        }
-    }
-
 
     Scaffold(
         modifier = modifier.background(Color.Transparent),

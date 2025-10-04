@@ -28,8 +28,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
-import com.viwath.music_player.presentation.ui.screen.dialog.Dialog
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
+import com.viwath.music_player.presentation.ui.screen.dialog.AppDialog
 import com.viwath.music_player.presentation.ui.screen.event.AlbumScreenEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
@@ -58,7 +58,8 @@ fun AlbumDetailScreen(
     navController: NavController,
     viewModel: AlbumViewModel = hiltViewModel(),
     musicViewModel: MusicViewModel = hiltViewModel(),
-    onMusicSelected: (MusicDto) -> Unit = {}
+    onMusicSelected: (MusicDto) -> Unit = {},
+    onMenuClick: (MusicDto) -> Unit
 ){
     val state = viewModel.state.value
     val playbackState = musicViewModel.playbackState.collectAsState().value
@@ -122,17 +123,18 @@ fun AlbumDetailScreen(
                         musicViewModel.onEvent(MusicEvent.OnPlay(selectedMusic, state.musics))
                     }
                     onMusicSelected(selectedMusic)
-                }
+                },
+                onMenuClick = onMenuClick
             )
         }
 
-        if (showDialog){
-            Dialog(
-                "V-Music",
-                state.albumDetailError,
-                onDismissRequest = { showDialog = false }
-            )
-        }
+        AppDialog(
+            showDialog = showDialog,
+            title = null,
+            message = state.albumDetailError,
+            confirmText = "OK",
+            onDismissRequest = { showDialog = false }
+        )
 
     }
 

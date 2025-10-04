@@ -2,6 +2,7 @@ package com.viwath.music_player.data.repository
 
 import android.content.ContentUris
 import android.content.Context
+import android.content.IntentSender
 import android.database.Cursor
 import android.os.Build
 import android.provider.MediaStore
@@ -33,11 +34,28 @@ class MusicRepositoryImp(
     // delete music from storage
     override suspend fun deleteMusic(music: Music): Int {
         return withContext(Dispatchers.IO){
-            context.contentResolver.delete(
+            val uri = ContentUris.withAppendedId(
                 MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
-                "${MediaStore.Audio.Media._ID}=?",
-                arrayOf(music.id.toString())
+                music.id
             )
+            context.contentResolver.delete(uri,null,null)
+        }
+    }
+
+    override suspend fun getDeletePermissionIntent(music: Music): IntentSender? {
+        return withContext(Dispatchers.IO) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                val uri = ContentUris.withAppendedId(
+                    MediaStore.Audio.Media.EXTERNAL_CONTENT_URI,
+                    music.id
+                )
+                MediaStore.createDeleteRequest(
+                    context.contentResolver,
+                    listOf(uri)
+                ).intentSender
+            } else {
+                null
+            }
         }
     }
 

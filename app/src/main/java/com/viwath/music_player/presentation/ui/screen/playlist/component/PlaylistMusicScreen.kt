@@ -43,9 +43,10 @@ import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.Routes
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.component.MusicList
+import com.viwath.music_player.presentation.ui.screen.dialog.AppDialog
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
-import com.viwath.music_player.presentation.ui.screen.music_list.ShowDialog
+import com.viwath.music_player.presentation.ui.screen.event.ResultMsg
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 
@@ -78,7 +79,8 @@ fun PlaylistMusicScreen(
     playlistViewModel: PlaylistViewModel,
     onMusicSelected: (MusicDto) -> Unit = {},
     onNavigateBack: () -> Unit,
-    navController: NavController
+    navController: NavController,
+    onMenuClick: (MusicDto) -> Unit
 ){
     // view-model state
     val state = playlistViewModel.state.value
@@ -106,10 +108,15 @@ fun PlaylistMusicScreen(
         }
     }
 
-    LaunchedEffect(state.error) {
-        if (state.error.isNotBlank()){
-            error = state.error
-            showErrorDialog = true
+    LaunchedEffect(Unit) {
+        playlistViewModel.message.collect { resultMsg ->
+            when(resultMsg){
+                is ResultMsg.Success -> {}
+                is ResultMsg.Error -> {
+                    error = resultMsg.message
+                    showErrorDialog = true
+                }
+            }
         }
     }
 
@@ -211,14 +218,6 @@ fun PlaylistMusicScreen(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
-            if (showErrorDialog){
-                ShowDialog(
-                    title = "Error",
-                    message = error
-                ) {
-                    showErrorDialog = false
-                }
-            }
 
             MusicList(
                 modifier = Modifier.fillMaxSize(),
@@ -231,8 +230,19 @@ fun PlaylistMusicScreen(
                         musicViewModel.onEvent(MusicEvent.OnPlay(selectedMusic, musicList))
                     }
                     onMusicSelected(selectedMusic)
-                }
+                },
+                onMenuClick = onMenuClick
             )
+
+
+            AppDialog(
+                showDialog = showErrorDialog,
+                title = null,
+                message = error,
+                confirmText = "OK",
+                onDismissRequest = { showErrorDialog = false }
+            )
+
         }
 
     }

@@ -44,7 +44,6 @@ fun MusicListItem(
     isPlaying: Boolean = false,
     isPaused: Boolean = false
 ){
-    Log.d("MusicListItem", "MusicListItem image path is: ${music.imagePath}")
     val textColor = if (isPlaying) Color.Green else Color.White
     Box(modifier = Modifier.background(Color.Transparent)){
         Row(

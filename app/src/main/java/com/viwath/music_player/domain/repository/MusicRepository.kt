@@ -1,5 +1,6 @@
 package com.viwath.music_player.domain.repository
 
+import android.content.IntentSender
 import com.viwath.music_player.domain.model.Album
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
@@ -11,6 +12,7 @@ interface MusicRepository {
 
     //delete music from storage
     suspend fun deleteMusic(music: Music): Int
+    suspend fun getDeletePermissionIntent(music: Music): IntentSender?
     //
     suspend fun getMusicFiles(): List<Music>
     suspend fun getAlbums(): List<Album>

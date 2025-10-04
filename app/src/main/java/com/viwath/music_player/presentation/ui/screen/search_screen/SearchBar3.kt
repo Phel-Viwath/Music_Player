@@ -1,10 +1,10 @@
 package com.viwath.music_player.presentation.ui.screen.search_screen
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -44,16 +44,20 @@ fun SearchBar3(
     onClose: () -> Unit
 ){
 
+    var isFocused by remember { mutableStateOf(false) }
     var text by remember { mutableStateOf("") }
+
     val focusRequester = remember { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
+    // Auto-focus on appear
     LaunchedEffect(Unit){
         delay(150)
         focusRequester.requestFocus()
         keyboardController?.show()
     }
 
+    // hide keyboard when leave
     DisposableEffect(Unit){
         onDispose {
             keyboardController?.hide()
@@ -62,26 +66,40 @@ fun SearchBar3(
 
     Row(
         modifier = modifier.fillMaxWidth()
-            .padding(horizontal = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(
+                color = Color.White.copy(alpha = 0.08f),
+                shape = RoundedCornerShape(16.dp)
+            )
+            .then(
+                if (isFocused) Modifier else Modifier
+            )
+            .padding(horizontal = 6.dp, vertical = 2.dp),
+        verticalAlignment = Alignment.CenterVertically
     ){
-        IconButton(onClick = {
-            keyboardController?.hide()
-            onClose()
-        }){
+        // Back button
+        IconButton(
+            onClick = {
+                keyboardController?.hide()
+                onClose()
+            },
+            modifier = Modifier
+                .size(36.dp)
+                .clip(RoundedCornerShape(50))
+                .background(Color.White.copy(alpha = 0.08f))
+        ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = "Back"
+                contentDescription = "Back",
+                tint = Color.White
             )
         }
 
         OutlinedTextField(
             modifier = Modifier
                 .weight(1f)
-                .padding(vertical = 2.dp)
-                .clip(RoundedCornerShape(8.dp))
-                .background(Color.DarkGray, shape = RoundedCornerShape(8.dp))
+                .padding(vertical = 4.dp)
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     if (focusState.isFocused){
@@ -96,7 +114,7 @@ fun SearchBar3(
             placeholder = { Text(
                 text = "Search music",
                 color = Color.White.copy(alpha = 0.6f),
-                fontSize = 12.sp
+                fontSize = 16.sp
             ) },
             trailingIcon = {
                 if (text.isNotEmpty()) {
@@ -117,15 +135,14 @@ fun SearchBar3(
                 }
             },
             colors = OutlinedTextFieldDefaults.colors(
-                focusedContainerColor = Color(0xFF2A2A2A), // Dark background
-                unfocusedContainerColor = Color(0xFF2A2A2A),
-                disabledContainerColor = Color(0xFF2A2A2A),
+                focusedContainerColor = Color.Transparent,
+                unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = Color.Transparent,
                 focusedBorderColor = Color.Transparent,
                 unfocusedBorderColor = Color.Transparent,
-                disabledBorderColor = Color.Transparent,
+                cursorColor = Color(0xFF8B5CF6),
                 focusedTextColor = Color.White,
-                unfocusedTextColor = Color.White,
-                cursorColor = Color(0xFF8B5CF6) // Purple cursor
+                unfocusedTextColor = Color.White
             ),
             textStyle = TextStyle(
                 fontSize = 16.sp,
@@ -134,7 +151,7 @@ fun SearchBar3(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSearch(text) }),
             maxLines = 1,
-            singleLine = true
+            singleLine = true,
         )
 
     }

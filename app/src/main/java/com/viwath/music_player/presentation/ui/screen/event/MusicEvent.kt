@@ -22,7 +22,9 @@ sealed class MusicEvent {
 
     data class AddToPlayNext(val music: MusicDto, val musics: List<MusicDto> = emptyList()): MusicEvent()
     data class AddToPlayLast(val music: MusicDto): MusicEvent()
+
     data class DeleteMusic(val music: MusicDto): MusicEvent()
+    data object OnDeletePermissionGranted: MusicEvent()
 
     data class ShuffleMode(val isShuffle: Boolean): MusicEvent()
     data class OnSeekTo(val position: Long): MusicEvent()

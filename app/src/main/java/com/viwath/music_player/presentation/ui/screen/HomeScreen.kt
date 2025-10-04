@@ -28,7 +28,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -39,6 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumScreen
+import com.viwath.music_player.presentation.ui.screen.bottom_sheet.ShowBottomSheetMenu
 import com.viwath.music_player.presentation.ui.screen.component.AmbientGradientBackground
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_list.MusicListScreen
@@ -62,6 +66,9 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
     val selectedTab = pagerState.currentPage
     val selectedOrder = viewModel.state.value.sortOrder
+
+    var selectedMusicForMenu by remember { mutableStateOf<MusicDto?>(null) }
+
 
     Box(
         modifier = Modifier
@@ -127,6 +134,9 @@ fun HomeScreen(
                                 viewModel = viewModel,
                                 onMusicSelected = { selectedMusic ->
                                     onMusicSelected(selectedMusic)
+                                },
+                                onMenuClick = { musicDto ->
+                                    selectedMusicForMenu = musicDto
                                 }
                             )
 
@@ -155,6 +165,15 @@ fun HomeScreen(
             }
 
         }
+    }
+
+    selectedMusicForMenu?.let { musicDto ->
+        ShowBottomSheetMenu(
+            isVisible = true,
+            musicDto = musicDto,
+            musicViewModel = viewModel,
+            onDismiss = { selectedMusicForMenu = null }
+        )
     }
 
 }

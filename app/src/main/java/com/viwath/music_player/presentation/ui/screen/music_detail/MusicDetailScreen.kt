@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.viwath.music_player.domain.model.dto.MusicDto
-import com.viwath.music_player.presentation.ui.screen.bottom_sheet.BottomSheetPlaylist
+import com.viwath.music_player.presentation.ui.screen.bottom_sheet.ShowBottomSheetMenu
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.ControlContent
@@ -35,7 +35,7 @@ import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 fun MusicDetailScreen(
     modifier: Modifier = Modifier,
     music: MusicDto,
-    viewModel: MusicViewModel = hiltViewModel(),
+    viewModel: MusicViewModel,
     favorViewModel: FavoriteViewModel = hiltViewModel()
 ){
 
@@ -143,10 +143,11 @@ fun MusicDetailScreen(
         }
     }
 
-    BottomSheetPlaylist(
+    ShowBottomSheetMenu(
         isVisible = showMoreMenu,
         musicDto = currentMusic,
-        onDismiss = { showMoreMenu = false }
+        onDismiss = { showMoreMenu = false },
+        musicViewModel = viewModel
     )
 
 }

@@ -22,7 +22,8 @@ fun MusicList(
     musicList: List<MusicDto>,
     currentMusic: MusicDto?,
     isPaused: Boolean,
-    onMusicSelected: (MusicDto) -> Unit
+    onMusicSelected: (MusicDto) -> Unit,
+    onMenuClick: (MusicDto) -> Unit
 ) {
 
     var selectedMusicForMenu by remember { mutableStateOf<MusicDto?>(null) }
@@ -46,9 +47,7 @@ fun MusicList(
                     onItemClick = { selectedMusic ->
                         onMusicSelected(selectedMusic)
                     },
-                    onItemMenuClick = { music ->
-                        selectedMusicForMenu = music
-                    },
+                    onItemMenuClick = onMenuClick,
                     isPlaying = isPlaying,
                     isPaused = isPause
                 )

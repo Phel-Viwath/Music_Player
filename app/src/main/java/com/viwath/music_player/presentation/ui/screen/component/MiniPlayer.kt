@@ -79,18 +79,6 @@ fun MiniPlayer(
                 verticalArrangement = Arrangement.SpaceBetween,
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                // progress
-                CustomProgressBar(
-                    modifier = Modifier.height(4.dp),
-                    currentPosition = currentPosition,
-                    duration = duration,
-                    onSeekTo = { position -> onSeekTo(position) },
-                    thumbColor = Color.Transparent,
-                    activeTrackColor = Color.Green,
-                    height = 4.dp
-                )
-
                 // row detail
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
@@ -159,6 +147,16 @@ fun MiniPlayer(
 
                 }
 
+                // progress
+                CustomProgressBar(
+                    modifier = Modifier.height(4.dp),
+                    currentPosition = currentPosition,
+                    duration = duration,
+                    onSeekTo = { position -> onSeekTo(position) },
+                    thumbColor = Color.Transparent,
+                    activeTrackColor = Color(0xFF8B5CF6),
+                    height = 4.dp
+                )
             }
 
         }
