@@ -12,7 +12,6 @@ import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.app.NotificationCompat
@@ -44,6 +43,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+/**
+ * A foreground service for playing music in the background.
+ *
+ * This service manages music playback using [ExoPlayer], integrates with the Android system
+ * through [MediaSessionCompat] for media controls (e.g., lock screen, Bluetooth),
+ * and displays a notification with playback controls.
+ *
+ * It communicates with the UI layer (e.g., [MainActivity]) via a [Binder] and exposes its
+ * playback state through a [StateFlow].
+ *
+ * @property exoPlayer The [ExoPlayer] instance for music playback. Injected by Hilt.
+ * @property mediaSession The [MediaSessionCompat] instance for system integration. Injected by Hilt.
+ * @property playbackState A [StateFlow] that emits the current [PlaybackState], allowing UI components to observe changes.
+ */
 
 @AndroidEntryPoint
 class MusicService : Service() {
@@ -82,10 +96,10 @@ class MusicService : Service() {
         cleanupService()
     }
 
-    // ===========================================
-    // Service Initialization
-    // ===========================================
-
+    /**
+     * Initializes the service components: notification channel, ExoPlayer listener,
+     * media session, and the playback state updater.
+     */
     private fun initializeService() {
         createNotificationChannel()
         setupExoPlayerListener()
@@ -93,16 +107,20 @@ class MusicService : Service() {
         startPlaybackUpdater()
     }
 
+    /**
+     * Cleans up resources when the service is destroyed.
+     * Cancels coroutines and releases the player and media session.
+     */
     private fun cleanupService() {
         serviceScope.cancel()
         exoPlayer.release()
         mediaSession.release()
     }
 
-    // ===========================================
-    // ExoPlayer Setup and Listeners
-    // ===========================================
-
+    /**
+     * Sets up a [Player.Listener] for [exoPlayer] to react to playback state changes.
+     * This updates the service's internal state, media session, and notification.
+     */
     private fun setupExoPlayerListener() {
         val listener = object : Player.Listener {
             override fun onIsPlayingChanged(isPlaying: Boolean) {
@@ -135,6 +153,10 @@ class MusicService : Service() {
         exoPlayer.addListener(listener)
     }
 
+    /**
+     * Updates the [currentMusic] property based on the current media item index in ExoPlayer.
+     * This ensures the service's state is in sync with the player.
+     */
     private fun updateCurrentMusic() {
         val currentIndex = exoPlayer.currentMediaItemIndex
         if (currentIndex in playlist.indices) {
@@ -142,16 +164,21 @@ class MusicService : Service() {
         }
     }
 
-    // ===========================================
-    // MediaSession Setup
-    // ===========================================
 
+    /**
+     * Initializes and activates the [MediaSessionCompat].
+     * It sets the callback for handling media control events from external sources
+     * (like lock screen, Bluetooth) and updates the initial metadata.
+     */
     private fun setupMediaSession() {
         mediaSession.setCallback(createMediaSessionCallback())
         mediaSession.isActive = true
         updateMediaMetadata()
     }
 
+    /**
+     * Creates and returns a [MediaSessionCompat.Callback] to handle media control events.
+     */
     private fun createMediaSessionCallback(): MediaSessionCompat.Callback{
         return object : MediaSessionCompat.Callback() {
             override fun onPlay() = playMusic()
@@ -176,10 +203,13 @@ class MusicService : Service() {
         }
     }
 
-    // ===========================================
-    // Playback Control Methods
-    // ===========================================
 
+    /**
+     * Sets a new playlist for the player.
+     *
+     * This clears the existing playlist, adds the new list of music, and prepares the player.
+     * @param musics The list of [Music] to be set as the new playlist.
+     */
     fun setPlaylist(musics: List<Music>) {
         playlist = musics
         val mediaItems = musics.map { MediaItem.fromUri(it.uri) }
@@ -192,8 +222,17 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Checks if the current playlist is empty.
+     * @return `true` if the playlist is empty, `false` otherwise.
+     */
     fun isPlaylistEmpty(): Boolean = playlist.isEmpty()
 
+    /**
+     * Starts or resumes playback.
+     * If a specific [Music] object is provided, it will play that track. Otherwise, it resumes the current track.
+     * @param music The optional [Music] track to start playing. If null, resumes the current track.
+     */
     fun playMusic(music: Music? = null) {
         music?.let {
             currentMusic = it
@@ -205,6 +244,11 @@ class MusicService : Service() {
         startForegroundService()
     }
 
+    /**
+     * Adds a music track to be played next.
+     * The track is inserted into the playlist immediately after the current track.
+     * @param music The [Music] track to add.
+     */
     fun addToPlayNext(music: Music){
         val currentIndex = exoPlayer.currentMediaItemIndex
         val mediaItem = MediaItem.fromUri(music.uri)
@@ -218,6 +262,11 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Adds a music track to the end of the playlist.
+     *
+     * @param music The [Music] track to add.
+     */
     fun playLast(music: Music){
         val mediaItem = MediaItem.fromUri(music.uri)
         exoPlayer.addMediaItem(mediaItem)
@@ -226,32 +275,52 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Pauses the current playback.
+     */
     fun pauseMusic() {
         exoPlayer.pause()
         updateNotification(false)
     }
 
+    /**
+     * Resumes the paused playback.
+     */
     fun resumeMusic(){
         exoPlayer.play()
     }
 
+    /**
+     * Skips to the next track in the playlist.
+     */
     fun nextMusic() {
         if (exoPlayer.hasNextMediaItem()) {
             exoPlayer.seekToNextMediaItem()
         }
     }
 
+    /**
+     * Skips to the previous track in the playlist.
+     */
     fun previousMusic() {
         if (exoPlayer.hasPreviousMediaItem()) {
             exoPlayer.seekToPreviousMediaItem()
         }
     }
 
+    /**
+     * Seeks to a specific position within the current track.
+     * @param position The position to seek to, in milliseconds.
+     */
     fun seekTo(position: Long) {
         exoPlayer.seekTo(position)
         updateNotification(exoPlayer.isPlaying)
     }
 
+    /**
+     * Jumps to a specific track in the playlist by its index.
+     * @param index The index of the track to play.
+     */
     fun seekToPosition(index: Int) {
         if (index in 0 until exoPlayer.mediaItemCount) {
             exoPlayer.seekToDefaultPosition(index)
@@ -261,24 +330,37 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Sets the player to repeat the entire playlist.
+     */
     fun repeatAll(){
         exoPlayer.repeatMode = Player.REPEAT_MODE_ALL
         updatePlaybackState()
         updateMediaMetadata()
     }
 
+    /**
+     * Sets the player to repeat the current track.
+     */
     fun repeatOne(){
         exoPlayer.repeatMode = Player.REPEAT_MODE_ONE
         updatePlaybackState()
         updateMediaMetadata()
     }
 
+    /**
+     * Enables or disables shuffle mode.
+     * @param isShuffle `true` to enable shuffle, `false` to disable.
+     */
     fun shuffleMode(isShuffle: Boolean){
         exoPlayer.shuffleModeEnabled = isShuffle
         updatePlaybackState()
         updateMediaMetadata()
     }
 
+    /**
+     * Stops the music playback, removes the foreground notification, and stops the service.
+     */
     @Suppress("DEPRECATION")
     fun stopService() {
         exoPlayer.stop()
@@ -287,6 +369,11 @@ class MusicService : Service() {
         isServiceStarted = false
     }
 
+    /**
+     * Gets the current playing mode (shuffle, repeat all, repeat one).
+     *
+     * @return The current [PlayingMode].
+     */
     fun getPlayingMode(): PlayingMode{
         return when{
             exoPlayer.shuffleModeEnabled -> PlayingMode.SHUFFLE
@@ -296,16 +383,23 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Prepares and sets a single music track for playback.
+     * Used when the playlist is initially empty.
+     * @param music The [Music] track to prepare.
+     */
     private fun prepareAndSetSingleTrack(music: Music) {
         val mediaItem = MediaItem.fromUri(music.uri)
         exoPlayer.setMediaItem(mediaItem)
         exoPlayer.prepare()
     }
 
-    // ===========================================
-    // State Updates
-    // ===========================================
 
+    /**
+     * Starts a coroutine that periodically updates the playback state and media metadata
+     * while music is playing. This ensures the UI and media session are kept in sync
+     * with the playback progress.
+     */
     private fun startPlaybackUpdater() {
         serviceScope.launch {
             while (true) {
@@ -318,6 +412,11 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Updates the [_playbackState] Flow with the latest information from [exoPlayer].
+     * This includes playback status, position, duration, and the current track.
+     * It also updates the [MediaSessionCompat]'s playback state.
+     */
     private fun updatePlaybackState() {
         val duration = if (exoPlayer.duration == C.TIME_UNSET) 0L else exoPlayer.duration
         val position = exoPlayer.currentPosition
@@ -340,6 +439,10 @@ class MusicService : Service() {
         mediaSession.setPlaybackState(mediaSessionState)
     }
 
+    /**
+     * Defines the set of actions supported by the media session (e.g., play, pause, skip).
+     * @return A bitmask of supported [PlaybackStateCompat] actions.
+     */
     private fun getPlaybackActions(): Long {
         return PlaybackStateCompat.ACTION_PLAY or
                 PlaybackStateCompat.ACTION_PAUSE or
@@ -349,6 +452,10 @@ class MusicService : Service() {
                 PlaybackStateCompat.ACTION_SEEK_TO
     }
 
+    /**
+     * Maps the [ExoPlayer]'s state to the corresponding [PlaybackStateCompat] state.
+     * @return The current playback state as a [PlaybackStateCompat] constant.
+     */
     private fun getPlaybackStateCompat(): Int {
         return when {
             exoPlayer.isPlaying -> PlaybackStateCompat.STATE_PLAYING
@@ -357,6 +464,10 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Updates the [MediaSessionCompat] metadata with information from the [currentMusic].
+     * This includes title, artist, album, duration, and album art.
+     */
     private fun updateMediaMetadata() {
         currentMusic?.let { music ->
             val metadata = MediaMetadataCompat.Builder()
@@ -371,10 +482,10 @@ class MusicService : Service() {
         }
     }
 
-    // ===========================================
-    // Notification Handling
-    // ===========================================
-
+    /**
+     * Handles actions received from the notification controls.
+     * @param action The string action to be performed (e.g., [ACTION_PLAY], [ACTION_PAUSE]).
+     */
     private fun handleNotificationAction(action: String) {
         when (action) {
             ACTION_PLAY -> playMusic()
@@ -385,6 +496,10 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Starts the service in the foreground if it's not already started.
+     * This displays the persistent notification required for background playback.
+     */
     private fun startForegroundService() {
         if (!isServiceStarted) {
             val notification = buildNotification(exoPlayer.isPlaying)
@@ -393,6 +508,11 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Updates the foreground notification with the current playback state (playing or paused).
+     *
+     * @param isPlaying `true` if music is currently playing, `false` otherwise.
+     */
     private fun updateNotification(isPlaying: Boolean) {
         if (isServiceStarted) {
             val notification = buildNotification(isPlaying)
@@ -401,6 +521,12 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Builds the notification with playback controls.
+     *
+     * @param isPlaying `true` if music is currently playing, which determines the play/pause icon.
+     * @return The constructed [Notification].
+     */
     private fun buildNotification(isPlaying: Boolean): Notification {
         val contentIntent = createMainActivityIntent()
         val (title, artist) = getCurrentTrackInfo()
@@ -430,21 +556,34 @@ class MusicService : Service() {
             .build()
     }
 
+    /**
+     * Creates a [PendingIntent] to open [MainActivity] when the notification is clicked.
+     * @return The configured [PendingIntent].
+     */
     private fun createMainActivityIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("OPEN_MUSIC_DETAIL", true)
         }
         return PendingIntent.getActivity(
             this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 
+    /**
+     * Gets the title and artist of the current track for display in the notification.
+     * Provides default values if the track information is not available.
+     * @return A [Pair] containing the title and artist strings.
+     */
     private fun getCurrentTrackInfo(): Pair<String, String> {
         val title = currentMusic?.title ?: "Unknown Music"
         val artist = currentMusic?.artist ?: "Unknown Artist"
         return title to artist
     }
 
+    /**
+     * Calculates the current playback progress as a percentage.
+     */
     private fun calculateProgress(): Int {
         val currentPosition = exoPlayer.currentPosition
         val duration = if (exoPlayer.duration == C.TIME_UNSET) 0L else exoPlayer.duration
@@ -453,6 +592,11 @@ class MusicService : Service() {
         } else 0
     }
 
+    /**
+     * Creates the play/pause action for the notification.
+     * @param isPlaying `true` to show a pause button, `false` to show a play button.
+     * @return The configured [NotificationCompat.Action].
+     */
     private fun createPlayPauseAction(isPlaying: Boolean): NotificationCompat.Action {
         return if (isPlaying) {
             NotificationCompat.Action(
@@ -469,6 +613,11 @@ class MusicService : Service() {
         }
     }
 
+    /**
+     * Creates a [PendingIntent] for a notification action (e.g., play, pause, next).
+     * @param action The string constant representing the action.
+     * @return The configured [PendingIntent] that will send the action to this service.
+     */
     private fun createActionIntent(action: String): PendingIntent {
         val intent = Intent(this, MusicService::class.java).apply {
             this.action = action
@@ -478,6 +627,10 @@ class MusicService : Service() {
         )
     }
 
+    /**
+     * Creates the notification channel required for Android Oreo (API 26) and above.
+     * This is necessary for displaying the foreground service notification.
+     */
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
@@ -493,11 +646,14 @@ class MusicService : Service() {
         }
     }
 
-    // ===========================================
-    // Inner Classes
-    // ===========================================
 
+    /**
+     * Binder for the [MusicService].
+     * Allows clients (like [MainActivity]) to get a direct instance of the service
+     * to call its public methods.
+     */
     inner class MusicBinder : Binder() {
+        /** Returns the instance of [MusicService] so clients can call public methods. */
         fun getService(): MusicService = this@MusicService
     }
 }

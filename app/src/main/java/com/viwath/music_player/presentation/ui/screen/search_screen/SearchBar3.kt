@@ -1,8 +1,10 @@
 package com.viwath.music_player.presentation.ui.screen.search_screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -65,8 +67,9 @@ fun SearchBar3(
     }
 
     Row(
-        modifier = modifier.fillMaxWidth()
-            .padding(horizontal = 12.dp, vertical = 8.dp)
+        modifier = modifier
+            .fillMaxWidth()
+            .height(56.dp)
             .clip(RoundedCornerShape(16.dp))
             .background(
                 color = Color.White.copy(alpha = 0.08f),
@@ -85,7 +88,7 @@ fun SearchBar3(
                 onClose()
             },
             modifier = Modifier
-                .size(36.dp)
+                .size(32.dp)
                 .clip(RoundedCornerShape(50))
                 .background(Color.White.copy(alpha = 0.08f))
         ) {
@@ -99,7 +102,7 @@ fun SearchBar3(
         OutlinedTextField(
             modifier = Modifier
                 .weight(1f)
-                .padding(vertical = 4.dp)
+                .clip(shape = RoundedCornerShape(16.dp))
                 .focusRequester(focusRequester)
                 .onFocusChanged { focusState ->
                     if (focusState.isFocused){
@@ -151,7 +154,7 @@ fun SearchBar3(
             keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
             keyboardActions = KeyboardActions(onSearch = { onSearch(text) }),
             maxLines = 1,
-            singleLine = true,
+            singleLine = true
         )
 
     }

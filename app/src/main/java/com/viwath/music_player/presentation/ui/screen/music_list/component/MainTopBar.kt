@@ -26,6 +26,7 @@ import com.viwath.music_player.presentation.ui.screen.music_detail.component.Dro
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainTopBar(
+    isShowSortMenu: Boolean = false,
     selectedOption: SortOrder,
     onSearchIconClick: () -> Unit,
     currentOrderOption: (SortOrder) -> Unit
@@ -46,28 +47,31 @@ fun MainTopBar(
         ),
         actions = {
             // order
-            Box {
-                IconButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier.padding(end = 12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Sort,
-                        contentDescription = "Android Icon",
-                        tint = Color.White
+            if (isShowSortMenu){
+                Box {
+                    IconButton(
+                        onClick = { expanded = true },
+                        modifier = Modifier.padding(end = 12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.Sort,
+                            contentDescription = "Android Icon",
+                            tint = Color.White
+                        )
+                    }
+                    DropDownMenu3(
+                        modifier = Modifier,
+                        expanded = expanded,
+                        options = SortOrder.entries,
+                        optionLabel = { it.displayName() },
+                        selectedOption = currentOrderOption,
+                        onDismissRequest = { expanded = false },
+                        currentOption = selectedOption,
+                        selectedColor = Color.Green
                     )
                 }
-                DropDownMenu3(
-                    modifier = Modifier,
-                    expanded = expanded,
-                    options = SortOrder.entries,
-                    optionLabel = { it.displayName() },
-                    selectedOption = currentOrderOption,
-                    onDismissRequest = { expanded = false },
-                    currentOption = selectedOption,
-                    selectedColor = Color.Green
-                )
             }
+
             // search
             IconButton(
                 onClick = onSearchIconClick
@@ -83,3 +87,4 @@ fun MainTopBar(
 
 
 }
+

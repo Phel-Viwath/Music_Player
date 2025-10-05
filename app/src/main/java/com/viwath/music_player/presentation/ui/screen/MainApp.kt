@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -16,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -24,6 +26,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import com.viwath.music_player.domain.model.dto.MusicDto
+import com.viwath.music_player.presentation.MainActivity
 import com.viwath.music_player.presentation.ui.screen.album_list.AlbumDetailScreen
 import com.viwath.music_player.presentation.ui.screen.bottom_sheet.BottomSheetMusic
 import com.viwath.music_player.presentation.ui.screen.bottom_sheet.ShowBottomSheetMenu
@@ -35,6 +38,8 @@ import com.viwath.music_player.presentation.ui.screen.search_screen.SearchScreen
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 
 /*
 * Bottom navigation has removed
@@ -56,15 +61,33 @@ import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainApp(
-    musicViewModel: MusicViewModel
+    musicViewModel: MusicViewModel,
+    shouldOpenMusicDetail: StateFlow<Boolean> = MutableStateFlow(false)
 ){
     val navController = rememberNavController()
     val playbackState = musicViewModel.playbackState.collectAsState().value
+
+    val openMusicDetail by shouldOpenMusicDetail.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? MainActivity
 
     var currentMusic by remember { mutableStateOf<MusicDto?>(null) }
     var showMusicDetail by remember { mutableStateOf(false) }
     var homeInitialTab by remember { mutableIntStateOf(0) }
     var selectedMusicForMenu by remember { mutableStateOf<MusicDto?>(null) }
+
+    LaunchedEffect(playbackState.currentMusic){
+        playbackState.currentMusic?.let {
+            currentMusic = it
+        }
+    }
+
+    LaunchedEffect(openMusicDetail){
+        if (openMusicDetail && currentMusic != null){
+            showMusicDetail = true
+            activity?.resetMusicDetailFlag()
+        }
+    }
 
     Box (
         modifier = Modifier.fillMaxSize()

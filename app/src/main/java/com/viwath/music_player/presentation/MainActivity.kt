@@ -1,6 +1,7 @@
 package com.viwath.music_player.presentation
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -25,11 +26,17 @@ import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val musicViewModel: MusicViewModel by viewModels()
+
+    private val _shouldOpenMusicDetail = MutableStateFlow(false)
+    val shouldOpenMusicDetail = _shouldOpenMusicDetail.asStateFlow()
+
 
     private val permissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
@@ -71,17 +78,26 @@ class MainActivity : ComponentActivity() {
 
         checkPermissions()
 
+        handleIntent(intent)
+
         setContent {
             Music_PlayerTheme {
-
                 Box(modifier = Modifier.fillMaxSize()) {
-                    MainApp(musicViewModel)
-                    ObserveDeletePermission()
+                    MainApp(
+                        musicViewModel,
+                        shouldOpenMusicDetail
+                    )
                 }
 
-
+                ObserveDeletePermission()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleIntent(intent)
     }
 
     @Composable
@@ -103,6 +119,15 @@ class MainActivity : ComponentActivity() {
             }
 
         }
+    }
+
+    //
+    private fun handleIntent(intent: Intent?){
+        if (intent?.getBooleanExtra("OPEN_MUSIC_DETAIL", false) == true)
+            _shouldOpenMusicDetail.value = true
+    }
+    fun resetMusicDetailFlag() {
+        _shouldOpenMusicDetail.value = false
     }
 
     private fun checkPermissions() {
@@ -134,11 +159,9 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun getNotificationPermission(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             Manifest.permission.POST_NOTIFICATIONS
-        } else {
-            ""
-        }
+        else ""
     }
 
 

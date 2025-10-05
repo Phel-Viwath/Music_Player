@@ -180,7 +180,6 @@ fun PlaylistMusicScreen(
                 .padding(innerPadding)
                 .background(Color.Transparent)
         ){
-            Log.d("UI", "PlaylistMusicScreen: ${musicList.isNotEmpty()}")
             if (musicList.isEmpty()){
                 Column(
                     modifier = Modifier.align(Alignment.Center),

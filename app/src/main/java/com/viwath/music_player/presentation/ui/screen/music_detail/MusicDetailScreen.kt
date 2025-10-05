@@ -43,9 +43,12 @@ fun MusicDetailScreen(
     var currentMusic = playbackState.currentMusic ?: music
     var isFavorite by remember(music.id) { mutableStateOf(music.isFavorite) }
     var isCurrentFavorite by remember { mutableStateOf(false) }
-    val currentMusicFavorite = favorViewModel.isFavorite(currentMusic.id.toString())
+    val currentMusicFavorite = favorViewModel.state.value.isFavorite
     var showMoreMenu by remember { mutableStateOf(false) }
 
+    LaunchedEffect(favorViewModel){
+        favorViewModel.onEvent(FavorEvent.CheckFavorite(music.id))
+    }
 
     LaunchedEffect(music) {
         currentMusic = music
@@ -56,7 +59,7 @@ fun MusicDetailScreen(
         isFavorite = music.isFavorite
     }
 
-    LaunchedEffect(favorViewModel) {
+    LaunchedEffect(favorViewModel.state.value.isFavorite) {
         isCurrentFavorite = currentMusicFavorite
     }
 

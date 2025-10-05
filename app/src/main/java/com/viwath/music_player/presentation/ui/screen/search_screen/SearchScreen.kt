@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,7 +51,10 @@ fun SearchScreen(
         ) {
             SearchBar3(
                 modifier = Modifier.fillMaxWidth()
-                    .background(Color(0xFF1A0B3D)),
+                    .background(
+                        Color(0xFF1A0B3D),
+                        shape = RoundedCornerShape(16.dp)
+                    ),
                 onSearch = { query ->
                     // Handle search query
                     musicViewModel.onEvent(MusicEvent.SearchTextChange(query))

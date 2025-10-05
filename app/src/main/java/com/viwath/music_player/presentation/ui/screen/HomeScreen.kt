@@ -54,6 +54,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
+/**
+ * The main screen of the application, featuring a tabbed interface for navigating between
+ * music lists, albums, and playlists.
+ *
+ * @param viewModel The [MusicViewModel] used to manage the state and events for music data.
+ * @param onMusicSelected A callback function that is invoked when a music item is selected,
+ *                        triggering playback.
+ * @param navController The [NavController] for handling navigation to other screens like search or playlist details.
+ * @param initialTab The starting tab index to be displayed. Defaults to 0 (Music tab).
+ * @param coroutinesScope The [CoroutineScope] for launching coroutines, particularly for handling UI events.
+ */
 @Composable
 fun HomeScreen(
     viewModel: MusicViewModel,
@@ -68,6 +79,7 @@ fun HomeScreen(
     val selectedOrder = viewModel.state.value.sortOrder
 
     var selectedMusicForMenu by remember { mutableStateOf<MusicDto?>(null) }
+    val isShowSortMenu = selectedTab == 0
 
 
     Box(
@@ -77,6 +89,7 @@ fun HomeScreen(
         Scaffold(
             topBar = {
                 MainTopBar(
+                    isShowSortMenu = isShowSortMenu,
                     selectedOption = selectedOrder,
                     onSearchIconClick = {
                         navController.navigate(
@@ -97,9 +110,7 @@ fun HomeScreen(
             contentWindowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
         ){ innerPadding ->
 
-            AmbientGradientBackground(
-                modifier = Modifier.fillMaxSize()
-            )
+            AmbientGradientBackground(modifier = Modifier.fillMaxSize())
 
             Box(
                 modifier = Modifier
@@ -127,38 +138,42 @@ fun HomeScreen(
                             .fillMaxHeight()
                     ) { page ->
                         when(page) {
-                            0 -> MusicListScreen(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .fillMaxHeight(),
-                                viewModel = viewModel,
-                                onMusicSelected = { selectedMusic ->
-                                    onMusicSelected(selectedMusic)
-                                },
-                                onMenuClick = { musicDto ->
-                                    selectedMusicForMenu = musicDto
-                                }
-                            )
+                            0 -> {
+                                MusicListScreen(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .fillMaxHeight(),
+                                    viewModel = viewModel,
+                                    onMusicSelected = { selectedMusic ->
+                                        onMusicSelected(selectedMusic)
+                                    },
+                                    onMenuClick = { musicDto ->
+                                        selectedMusicForMenu = musicDto
+                                    }
+                                )
+                            }
 
                             1 -> AlbumScreen(navController = navController)
 
-                            2 -> PlaylistScreen(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .background(Color.Transparent)
-                                    .padding(12.dp),
-                                onItemClick = { playlistItem ->
-                                    playlistItem.playlistId?.let { id ->
-                                        navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){
-                                            launchSingleTop = true
-                                        }
-                                    } ?: run {
-                                        navController.navigate(Routes.PlaylistMusicScreen.route + "/0"){
-                                            launchSingleTop = true
+                            2 -> {
+                                PlaylistScreen(
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .background(Color.Transparent)
+                                        .padding(12.dp),
+                                    onItemClick = { playlistItem ->
+                                        playlistItem.playlistId?.let { id ->
+                                            navController.navigate(Routes.PlaylistMusicScreen.route + "/$id"){
+                                                launchSingleTop = true
+                                            }
+                                        } ?: run {
+                                            navController.navigate(Routes.PlaylistMusicScreen.route + "/0"){
+                                                launchSingleTop = true
+                                            }
                                         }
                                     }
-                                }
-                            )
+                                )
+                            }
                         }
                     }
                 }
