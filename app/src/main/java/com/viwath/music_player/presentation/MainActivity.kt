@@ -1,9 +1,6 @@
 package com.viwath.music_player.presentation
 
-import android.Manifest
 import android.content.Intent
-import android.content.pm.PackageManager
-import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -17,10 +14,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.viwath.music_player.core.util.permission.PermissionManager
+import com.viwath.music_player.core.util.permission.PermissionType
 import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
@@ -32,30 +30,10 @@ import kotlinx.coroutines.flow.asStateFlow
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    private lateinit var permissionManager: PermissionManager
     private val musicViewModel: MusicViewModel by viewModels()
-
     private val _shouldOpenMusicDetail = MutableStateFlow(false)
     val shouldOpenMusicDetail = _shouldOpenMusicDetail.asStateFlow()
-
-
-    private val permissionLauncher = registerForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissions ->
-
-        val readPermissionGranted = permissions[getReadPermission()] == true
-        val notificationPermissionGranted = permissions[getNotificationPermission()] == true
-
-        if (readPermissionGranted) {
-            Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show()
-            musicViewModel.onEvent(MusicEvent.OnLoadMusic)
-        } else {
-            Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show()
-        }
-
-        if (!notificationPermissionGranted && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Toast.makeText(this, "Notification permission denied", Toast.LENGTH_SHORT).show()
-        }
-    }
 
     // Add this for handling delete permission
     private val deleteRequestLauncher = registerForActivityResult(
@@ -76,8 +54,9 @@ class MainActivity : ComponentActivity() {
         // Turn off the decor fitting system windows, which allows us to handle insets
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
-        checkPermissions()
+        permissionManager = PermissionManager(this)
 
+        checkAndRequestPermissions()
         handleIntent(intent)
 
         setContent {
@@ -88,7 +67,6 @@ class MainActivity : ComponentActivity() {
                         shouldOpenMusicDetail
                     )
                 }
-
                 ObserveDeletePermission()
             }
         }
@@ -130,39 +108,21 @@ class MainActivity : ComponentActivity() {
         _shouldOpenMusicDetail.value = false
     }
 
-    private fun checkPermissions() {
-        val readPermission = getReadPermission()
-        val notificationPermission = getNotificationPermission()
-        val permissions = mutableListOf(readPermission, notificationPermission)
-
-        val hasReadPermission = ContextCompat.checkSelfPermission(
-            this, readPermission
-        ) == PackageManager.PERMISSION_GRANTED
-
-        val hasNotificationPermission = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            ContextCompat.checkSelfPermission(
-                this, notificationPermission
-            ) == PackageManager.PERMISSION_GRANTED
-        } else true
-
-        if (!hasReadPermission || !hasNotificationPermission) {
-            permissionLauncher.launch(permissions.toTypedArray())
+    private fun checkAndRequestPermissions() {
+        // Request AUDIO permission first
+        if (!permissionManager.hasPermission(PermissionType.AUDIO_AND_NOTIFICATION)) {
+            permissionManager.requestPermission(PermissionType.AUDIO_AND_NOTIFICATION) { granted ->
+                if (granted) {
+                    Toast.makeText(this, "Audio permission granted", Toast.LENGTH_SHORT).show()
+                    musicViewModel.onEvent(MusicEvent.OnLoadMusic)
+                } else {
+                    Toast.makeText(this, "Audio permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
         } else {
             musicViewModel.onEvent(MusicEvent.OnLoadMusic)
         }
-    }
 
-    private fun getReadPermission(): String {
-        return if (Build.VERSION.SDK_INT > Build.VERSION_CODES.TIRAMISU)
-            Manifest.permission.READ_MEDIA_AUDIO
-        else Manifest.permission.READ_EXTERNAL_STORAGE
     }
-
-    private fun getNotificationPermission(): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            Manifest.permission.POST_NOTIFICATIONS
-        else ""
-    }
-
 
 }

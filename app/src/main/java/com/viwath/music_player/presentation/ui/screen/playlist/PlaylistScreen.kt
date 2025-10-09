@@ -32,7 +32,7 @@ import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.presentation.ui.screen.dialog.AppDialog
 import com.viwath.music_player.presentation.ui.screen.event.PlaylistEvent
 import com.viwath.music_player.presentation.ui.screen.event.ResultMsg
-import com.viwath.music_player.presentation.ui.screen.playlist.component.NewPlaylistDialogM3
+import com.viwath.music_player.presentation.ui.screen.dialog.NewPlaylistDialogM3
 import com.viwath.music_player.presentation.ui.screen.playlist.component.PlaylistItem
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
 

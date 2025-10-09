@@ -1,4 +1,4 @@
-package com.viwath.music_player.core.util
+package com.viwath.music_player.core.common
 
 enum class SortOrder {
     TITLE,

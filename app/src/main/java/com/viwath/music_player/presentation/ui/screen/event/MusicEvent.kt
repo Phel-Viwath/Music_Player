@@ -1,6 +1,6 @@
 package com.viwath.music_player.presentation.ui.screen.event
 
-import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.domain.model.dto.MusicDto
 
 sealed class MusicEvent {

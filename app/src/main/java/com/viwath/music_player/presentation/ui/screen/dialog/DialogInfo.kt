@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.viwath.music_player.core.util.dateFormatter
 import com.viwath.music_player.domain.model.dto.MusicDto
 
 @Composable
@@ -37,8 +38,8 @@ fun DialogInfo(
                     InfoItem(label = "Name", value = musicDto.title)
                     InfoItem(label = "Artist", value = musicDto.artist)
                     InfoItem(label = "Album", value = musicDto.album)
-                    InfoItem(label = "Duration", value = "${musicDto.duration}")
-                    InfoItem(label = "Add date", value = musicDto.addDate)
+                    InfoItem(label = "Duration", value = "${musicDto.duration / 1000 / 60}:${musicDto.duration / 1000 % 60}")
+                    InfoItem(label = "Add date", value = dateFormatter(musicDto.addDate))
                     InfoItem(label = "Path", value = musicDto.uri.substringBeforeLast("/"), isLast = true)
                 }
             }

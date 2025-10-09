@@ -2,7 +2,7 @@ package com.viwath.music_player.domain.use_case.music_use_case
 
 import android.util.Log
 import com.viwath.music_player.core.util.Resource
-import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.domain.model.FavoriteMusic
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.MusicDto

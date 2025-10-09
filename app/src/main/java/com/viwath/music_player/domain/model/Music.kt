@@ -12,5 +12,5 @@ data class Music(
     val duration: Long,
     val imagePath: String?, // use to get image
     val uri: String,
-    val addDate: String
+    val addDate: Long
 )

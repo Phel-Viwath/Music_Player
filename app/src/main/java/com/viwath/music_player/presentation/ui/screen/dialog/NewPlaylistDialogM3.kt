@@ -1,4 +1,4 @@
-package com.viwath.music_player.presentation.ui.screen.playlist.component
+package com.viwath.music_player.presentation.ui.screen.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -98,7 +98,8 @@ fun NewPlaylistDialogM3(
                     Text(
                         text = "Done",
                         color = if (playlistTitle.isNotBlank())
-                            Color(0xFF6B46C1) else Color(0xFF48484A)
+                            Color(0xFF6B46C1)
+                        else Color(0xFF48484A)
                     )
                 }
             },

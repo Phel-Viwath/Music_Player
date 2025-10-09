@@ -14,7 +14,7 @@ data class FavoriteMusic(
     val duration: Long,
     val imagePath: String?,
     val uri: String,
-    val addDate: String
+    val addDate: Long
 )
 
 fun Music.toFavoriteMusic(): FavoriteMusic {

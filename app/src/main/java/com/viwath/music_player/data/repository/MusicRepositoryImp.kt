@@ -181,7 +181,7 @@ class MusicRepositoryImp(
                 val albumId = cursor.getLong(cursor.albumIdCol())
                 val data = cursor.getString(cursor.dataCol())
                 val duration = cursor.getLong(cursor.durationCol())
-                val dateCol = cursor.getString(cursor.dateCol())
+                val dateCol = cursor.getLong(cursor.dateCol())
 
                 val imagePath = data.getImagePath(context)
                 val music = Music(
@@ -289,7 +289,7 @@ class MusicRepositoryImp(
                 val albumId = cursor.getLong(cursor.albumIdCol())
                 val data = cursor.getString(cursor.dataCol())
                 val duration = cursor.getLong(cursor.durationCol())
-                val dateCol = cursor.getString(cursor.dateCol())
+                val dateCol = cursor.getLong(cursor.dateCol())
                 val imagePath = data.getImagePath(context)
                 val music = Music(
                     id,

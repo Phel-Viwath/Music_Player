@@ -257,10 +257,15 @@ fun DropDownMenus(
     DropdownMenu(
         expanded = isShowMenu,
         onDismissRequest = onDismiss,
-        properties = PopupProperties(focusable = false)
+        properties = PopupProperties(focusable = false),
+        modifier = Modifier.background(Color(0xFF8B5CF6))
     ) {
         DropdownMenuItem(
             text = { Text("Add Music", color = Color.White) },
+            onClick = onAddMusicClick
+        )
+        DropdownMenuItem(
+            text = { Text("Update", color = Color.White) },
             onClick = onAddMusicClick
         )
         DropdownMenuItem(

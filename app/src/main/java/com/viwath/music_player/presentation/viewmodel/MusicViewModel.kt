@@ -11,7 +11,7 @@ import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.DeleteResult
 import com.viwath.music_player.core.util.MyPrefs
 import com.viwath.music_player.core.util.Resource
-import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.toMusic
@@ -97,7 +97,10 @@ class MusicViewModel @Inject constructor(
                 searchMusic()
             }
 
-            is MusicEvent.OnLoadMusic -> loadMusicFiles()
+            is MusicEvent.OnLoadMusic -> {
+                Log.d("MusicViewModel", "onEvent: load music called")
+                loadMusicFiles()
+            }
             is MusicEvent.OnPlayNext -> nextMusic()
             is MusicEvent.OnPlayPrevious -> previousMusic()
             is MusicEvent.OnPause -> pauseMusic()

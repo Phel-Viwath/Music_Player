@@ -8,7 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.viwath.music_player.core.util.Constant
 import com.viwath.music_player.core.util.Resource
-import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.domain.model.PlaylistSong
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.PlaylistDto

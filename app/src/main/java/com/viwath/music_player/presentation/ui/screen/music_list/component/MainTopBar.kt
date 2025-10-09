@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.viwath.music_player.R
-import com.viwath.music_player.core.util.SortOrder
+import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.presentation.ui.screen.music_detail.component.DropDownMenu3
 
 @OptIn(ExperimentalMaterial3Api::class)

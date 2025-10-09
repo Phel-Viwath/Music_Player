@@ -42,6 +42,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.viwath.music_player.core.util.shareIntent
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.dialog.DialogInfo
 import com.viwath.music_player.presentation.ui.screen.event.FavorEvent
@@ -154,6 +155,7 @@ fun ShowBottomSheetMenu(
                 icon = Icons.Default.Share,
                 action = {
                     // Handle share action
+                    shareIntent(context, musicDto.uri)
                 }
             ),
             BottomSheetMenuItem(
@@ -235,8 +237,6 @@ fun MoreBottomSheet(
             )
         }
     }
-
-
 
 }
 

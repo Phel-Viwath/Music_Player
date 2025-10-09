@@ -1,0 +1,7 @@
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Share files from external app storage -->
+    <external-path name="external_files" path="." />
+
+    <!-- Or if you use internal app storage -->
+    <external-files-path name="music_files" path="." />
+</paths>
