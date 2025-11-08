@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "591225529471",
+    "project_id": "v-music-b473e",
+    "storage_bucket": "v-music-b473e.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:591225529471:android:5ea198479f47ed685a8b4a",
+        "android_client_info": {
+          "package_name": "com.viwath.music_player"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAHYcePUvXOeRLA7R6V6MyJ8YiLOR-qKEM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

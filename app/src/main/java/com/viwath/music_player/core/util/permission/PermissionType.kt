@@ -8,7 +8,8 @@ enum class PermissionType(val permissions: List<String>) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             listOf(
                 Manifest.permission.READ_MEDIA_AUDIO,
-                Manifest.permission.POST_NOTIFICATIONS
+                Manifest.permission.POST_NOTIFICATIONS,
+                Manifest.permission.READ_PHONE_STATE,
             )
         else listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     )

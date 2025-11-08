@@ -5,15 +5,22 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
+import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.telephony.TelephonyCallback
+import android.telephony.TelephonyManager
+import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
@@ -28,6 +35,7 @@ import com.viwath.music_player.core.util.Constant.ACTION_STOP
 import com.viwath.music_player.core.util.Constant.CHANNEL_ID
 import com.viwath.music_player.core.util.Constant.NOTIFICATION_ID
 import com.viwath.music_player.core.util.GetImage.getImageBitMap
+import com.viwath.music_player.domain.broadcast.PhoneCallReceiver
 import com.viwath.music_player.domain.model.Music
 import com.viwath.music_player.domain.model.dto.toMusicDto
 import com.viwath.music_player.presentation.MainActivity
@@ -65,6 +73,9 @@ class MusicService : Service() {
     @Inject lateinit var exoPlayer: ExoPlayer
     @Inject lateinit var mediaSession: MediaSessionCompat
 
+    lateinit var telephonyManager: TelephonyManager
+    private var callStateListener: PhoneCallReceiver? = null
+
     // State management
     private var currentMusic: Music? = null
     private var playlist: List<Music> = emptyList()
@@ -79,8 +90,27 @@ class MusicService : Service() {
     // Service Lifecycle
     // ===========================================
 
+    @RequiresApi(Build.VERSION_CODES.S)
     override fun onCreate() {
         super.onCreate()
+        telephonyManager = getSystemService(TELEPHONY_SERVICE) as TelephonyManager
+        callStateListener = PhoneCallReceiver(
+            onCallStart = { pauseMusic() },
+            onCallEnded = { resumeMusic() }
+        )
+
+        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE)
+            == PackageManager.PERMISSION_GRANTED){
+                telephonyManager.registerTelephonyCallback(
+                    mainExecutor,
+                    callStateListener!!
+                )
+        }
+        else {
+            Log.e("MusicService", "READ_PHONE_STATE permission not granted")
+        }
+
+
         initializeService()
     }
 
