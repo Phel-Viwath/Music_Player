@@ -1,6 +1,7 @@
 package com.viwath.music_player.domain.use_case.playlist_use_case
 
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.toMusicDto
@@ -30,6 +31,8 @@ class GetPlaylistSongsUseCase @Inject constructor(
                 emit(Resource.Success(musicDtoList))
             }
         }catch (e: Exception){
+            FirebaseCrashlytics.getInstance().log("GetPlaylistSongsUseCase")
+            FirebaseCrashlytics.getInstance().recordException(e)
             Log.e("GetPlaylistSongsUseCase", "invoke error:", e)
             emit(Resource.Error(e.message ?: "Unknown error"))
         }

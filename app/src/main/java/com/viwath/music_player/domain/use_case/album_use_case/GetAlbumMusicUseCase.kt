@@ -1,5 +1,6 @@
 package com.viwath.music_player.domain.use_case.album_use_case
 
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.domain.model.dto.toMusicDto
@@ -23,6 +24,8 @@ class GetAlbumMusicUseCase @Inject constructor(
             }
             emit(Resource.Success(musicFiles))
         }catch (e: Exception){
+            FirebaseCrashlytics.getInstance().log("GetAlbumMusicUseCase")
+            FirebaseCrashlytics.getInstance().recordException(e)
             emit(Resource.Error(e.message ?: "Unknown error"))
         }
     }

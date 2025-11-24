@@ -1,6 +1,7 @@
 package com.viwath.music_player.domain.use_case.playlist_use_case
 
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.domain.model.dto.PlaylistDto
 import com.viwath.music_player.domain.model.dto.toPlaylistDto
 import com.viwath.music_player.domain.repository.MusicRepository
@@ -23,6 +24,8 @@ class GetAllPlaylistUseCase @Inject constructor(
                 }
             }
         }catch (e: Exception){
+            FirebaseCrashlytics.getInstance().log("GetAllPlaylistUseCase")
+            FirebaseCrashlytics.getInstance().recordException(e)
             Log.e("GetAllPlaylistUseCase", "invoke: ${e.message}")
             emptyFlow()
         }

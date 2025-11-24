@@ -1,6 +1,7 @@
 package com.viwath.music_player.domain.use_case.music_use_case
 
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.core.common.SortOrder
 import com.viwath.music_player.domain.model.FavoriteMusic
@@ -31,6 +32,8 @@ class GetMusicsUseCase @Inject constructor(
             }
             emit(Resource.Success(musics))
         } catch (e: Exception) {
+            FirebaseCrashlytics.getInstance().log("GetMusicListUseCase")
+            FirebaseCrashlytics.getInstance().recordException(e)
             emit(Resource.Error(e.message ?: "Unknown error"))
         }
     }.flowOn(Dispatchers.IO)

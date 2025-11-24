@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.permission.PermissionManager
 import com.viwath.music_player.core.util.permission.PermissionType
 import com.viwath.music_player.presentation.ui.screen.MainApp
@@ -50,6 +51,9 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
+        // set firebase crashlytics collection enabled
+        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
+
 
         // Turn off the decor fitting system windows, which allows us to handle insets
         WindowCompat.setDecorFitsSystemWindows(window, false)

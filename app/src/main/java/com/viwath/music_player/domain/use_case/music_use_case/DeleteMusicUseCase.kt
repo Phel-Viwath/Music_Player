@@ -2,6 +2,7 @@ package com.viwath.music_player.domain.use_case.music_use_case
 
 import android.os.Build
 import android.util.Log
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.DeleteResult
 import com.viwath.music_player.core.util.Resource
 import com.viwath.music_player.domain.model.Music
@@ -37,6 +38,8 @@ class DeleteMusicUseCase @Inject constructor(
                  emit(Resource.Error("Failed to delete music"))
              }
          }catch (e: Exception){
+             FirebaseCrashlytics.getInstance().log("DeleteMusicUseCase")
+             FirebaseCrashlytics.getInstance().recordException(e)
              Log.e("DeleteMusicUseCase", "invoke: ${e.message}")
              emit(Resource.Error(e.message ?: "Unknown error"))
          }
