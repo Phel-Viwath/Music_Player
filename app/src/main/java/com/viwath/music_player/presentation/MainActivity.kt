@@ -17,13 +17,13 @@ import androidx.compose.ui.Modifier
 import androidx.core.view.WindowCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.permission.PermissionManager
 import com.viwath.music_player.core.util.permission.PermissionType
 import com.viwath.music_player.presentation.ui.screen.MainApp
 import com.viwath.music_player.presentation.ui.screen.event.MusicEvent
 import com.viwath.music_player.presentation.ui.theme.Music_PlayerTheme
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +33,8 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var permissionManager: PermissionManager
     private val musicViewModel: MusicViewModel by viewModels()
+    private val visualizerViewModel: VisualizerViewModel by viewModels()
+
     private val _shouldOpenMusicDetail = MutableStateFlow(false)
     val shouldOpenMusicDetail = _shouldOpenMusicDetail.asStateFlow()
 
@@ -51,10 +53,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        // set firebase crashlytics collection enabled
-        FirebaseCrashlytics.getInstance().isCrashlyticsCollectionEnabled = true
-
-
         // Turn off the decor fitting system windows, which allows us to handle insets
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -68,6 +66,7 @@ class MainActivity : ComponentActivity() {
                 Box(modifier = Modifier.fillMaxSize()) {
                     MainApp(
                         musicViewModel,
+                        visualizerViewModel,
                         shouldOpenMusicDetail
                     )
                 }

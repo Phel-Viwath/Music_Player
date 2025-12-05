@@ -5,7 +5,6 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.Service
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Binder
@@ -14,7 +13,6 @@ import android.os.IBinder
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -109,7 +107,6 @@ class MusicService : Service() {
         else {
             Log.e("MusicService", "READ_PHONE_STATE permission not granted")
         }
-
 
         initializeService()
     }
@@ -566,7 +563,7 @@ class MusicService : Service() {
             .setContentIntent(contentIntent)
             .setContentTitle(title)
             .setContentText(artist)
-            .setSmallIcon(android.R.drawable.ic_media_play)
+            .setSmallIcon(R.drawable.ic_volume_high)
             .setLargeIcon(currentMusic?.imagePath?.getImageBitMap())
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .setOnlyAlertOnce(true)

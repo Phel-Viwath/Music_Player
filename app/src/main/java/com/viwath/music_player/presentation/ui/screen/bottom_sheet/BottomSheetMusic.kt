@@ -12,12 +12,14 @@ import androidx.compose.ui.unit.dp
 import com.viwath.music_player.domain.model.dto.MusicDto
 import com.viwath.music_player.presentation.ui.screen.music_detail.MusicDetailScreen
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
+import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetMusic(
     currentMusic: MusicDto,
     musicViewModel: MusicViewModel,
+    visualizerViewModel: VisualizerViewModel,
     onDismiss: (Boolean) -> Unit,
 ){
     val bottomSheetState = rememberModalBottomSheetState(
@@ -37,7 +39,7 @@ fun BottomSheetMusic(
                 .fillMaxSize(),
             music = currentMusic,
             viewModel = musicViewModel,
-            //visualizerViewModel = visualizerViewModel
+            visualizerViewModel = visualizerViewModel
         )
     }
 }

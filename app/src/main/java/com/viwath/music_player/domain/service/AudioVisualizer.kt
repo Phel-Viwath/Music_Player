@@ -6,6 +6,7 @@ import android.util.Log
 import androidx.media3.common.C
 import androidx.media3.exoplayer.ExoPlayer
 import com.viwath.music_player.core.util.AudioLevels
+import kotlin.math.hypot
 import kotlin.math.log10
 import kotlin.math.sqrt
 
@@ -59,7 +60,7 @@ class AudioVisualizer(
         }
     }
 
-    fun getRawWaveform(): ByteArray? {
+    /*fun getRawWaveform(): ByteArray? {
         return try {
             val viz = visualizer ?: return null
             if (!viz.enabled) return null
@@ -77,7 +78,7 @@ class AudioVisualizer(
             Log.e("AudioVisualizer", "Error getting waveform: ${e.message}")
             null
         }
-    }
+    }*/
 
     fun getRawFft(): ByteArray? {
         return try {
@@ -102,31 +103,72 @@ class AudioVisualizer(
         return processFftData(fftData, numberBand)
     }
 
-    private fun processFftData(fftData: ByteArray, numberBand: Int): FloatArray{
+    /*private fun processFftData(fftData: ByteArray, numberBand: Int): FloatArray {
         val band = FloatArray(numberBand)
-        val dataSize = fftData.size
+        val n = fftData.size
+        val dataSize = n / 2
         val bandSize = dataSize / numberBand
         for (i in 0 until numberBand){
             var sum = 0f
-            var  startIdx = i * bandSize
-            var endIdx = minOf(startIdx + bandSize, dataSize - 1)
-            for (j in startIdx until endIdx step 2){
-                if (j + 1 < fftData.size){
-                    val real = fftData[j].toFloat()
-                    val imaginary = fftData[j + 1].toFloat()
-                    val magnitude = sqrt(real * real + imaginary * imaginary)
-                    val logMagnitude = log10(1 + magnitude)
-                    sum += logMagnitude
-                }
+            val startIdx = i * bandSize
+            val endIdx = minOf(startIdx + bandSize, dataSize - 1)
+
+            // FFT data comes in Real/Imaginary pairs
+            for (j in startIdx until endIdx){
+                val real = fftData[2 * j].toFloat()
+                val imag = fftData[2 * j + 1].toFloat()
+                // Calculate magnitude
+                val magnitude = hypot(real, imag)
+                sum += magnitude
             }
-            // Average and normalize
-            band[i] = (sum / bandSize).coerceIn(0f, 255f) / 255f
+            // Average and Logarithmic scaling (to make quiet sounds visible)
+            // Multiplier 4f adds some visual "gain"
+            val avg = (sum / bandSize) * 4f
+            // Normalize roughly 0..1
+            band[i] = (log10(1 + avg) / 2.5f).coerceIn(0f, 1f)
         }
 
         return band
+    } */
+
+    private fun processFftData(fft: ByteArray, targetSize: Int): FloatArray {
+        val result = FloatArray(targetSize)
+        val n = fft.size / 2 // We only use the first half of FFT
+        val blockSize = n / targetSize
+
+        for (i in 0 until targetSize) {
+            val start = i * blockSize
+            val end = minOf(start + blockSize, n)
+            result[i] = calculateAverageMagnitude(fft, start, end)
+        }
+        return result
     }
 
     fun getAudioLevels(): AudioLevels {
+        val fft = getRawFft() ?: return AudioLevels()
+
+        // FFT size is usually 1024. The useful data is the first half (512).
+        val n = fft.size / 2
+
+        // Define ranges (approximate for 44.1kHz sample rate)
+        // Bass: Lower 10% of frequencies
+        // Mid: 10% to 40%
+        // Treble: 40% to 100%
+        val bassEnd = (n * 0.01).toInt()
+        val midEnd = (n * 0.4).toInt()
+
+        val bass = calculateAverageMagnitude(fft, 0, bassEnd)
+        val mid = calculateAverageMagnitude(fft, bassEnd, midEnd)
+        val treble = calculateAverageMagnitude(fft, midEnd, n)
+
+        return AudioLevels(
+            bass = bass,
+            mid = mid,
+            treble = treble
+        )
+    }
+
+    /*fun getAudioLevels(): AudioLevels {
         val fftData = getRawFft() ?: return AudioLevels()
         val dataSize = fftData.size / 2
 
@@ -171,12 +213,47 @@ class AudioVisualizer(
             }
         }
 
-        val maxValue = 255f / (dataSize / 4) // Rough animation
+        val maxValue = 256f / (dataSize / 4) // Rough animation
         return AudioLevels(
             bass = (bass / maxValue ).coerceIn(0f, 1f),
             mid = (mid / maxValue).coerceIn(0f, 1f),
             treble = (treble / maxValue).coerceIn(0f, 1f)
         )
+    } */
+
+
+    private fun calculateAverageMagnitude(fft: ByteArray, start: Int, end: Int): Float {
+        if (start >= end) return 0f
+
+        var totalMagnitude = 0f
+        val count = end - start
+
+        // FFT data is stored as [Real, Imaginary, Real, Imaginary...]
+        for (i in start until end) {
+            val realIdx = i * 2
+            val imagIdx = i * 2 + 1
+
+            if (imagIdx < fft.size) {
+                // Bytes are signed (-128 to 127). Convert to float.
+                val real = fft[realIdx].toFloat()
+                val imag = fft[imagIdx].toFloat()
+
+                // Calculate magnitude
+                val magnitude = hypot(real, imag)
+                totalMagnitude += magnitude
+            }
+        }
+
+        // Average magnitude for this range
+        val avg = totalMagnitude / count
+
+        // SCALING FACTOR: This is the magic number.
+        // Raw FFT magnitudes usually range 0-150 depending on volume.
+        // We log-scale it to make quiet sounds visible.
+        // log10(1 + 50) ~= 1.7. log10(1 + 150) ~= 2.1.
+        // Dividing by 2.5f keeps it usually under 1.0 without hard clipping.
+
+        return (log10(1 + avg) / 2.2f).coerceIn(0f, 1f)
     }
     
 }

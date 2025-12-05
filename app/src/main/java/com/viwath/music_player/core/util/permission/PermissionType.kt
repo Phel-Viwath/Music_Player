@@ -10,6 +10,9 @@ enum class PermissionType(val permissions: List<String>) {
                 Manifest.permission.READ_MEDIA_AUDIO,
                 Manifest.permission.POST_NOTIFICATIONS,
                 Manifest.permission.READ_PHONE_STATE,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.MODIFY_AUDIO_SETTINGS,
+                Manifest.permission.FOREGROUND_SERVICE
             )
         else listOf(Manifest.permission.READ_EXTERNAL_STORAGE)
     )

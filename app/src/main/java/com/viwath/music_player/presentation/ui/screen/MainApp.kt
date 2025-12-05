@@ -38,6 +38,7 @@ import com.viwath.music_player.presentation.ui.screen.search_screen.SearchScreen
 import com.viwath.music_player.presentation.viewmodel.AlbumViewModel
 import com.viwath.music_player.presentation.viewmodel.MusicViewModel
 import com.viwath.music_player.presentation.viewmodel.PlaylistViewModel
+import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -62,6 +63,7 @@ import kotlinx.coroutines.flow.StateFlow
 @Composable
 fun MainApp(
     musicViewModel: MusicViewModel,
+    visualizerViewModel: VisualizerViewModel,
     shouldOpenMusicDetail: StateFlow<Boolean> = MutableStateFlow(false)
 ){
     val navController = rememberNavController()
@@ -207,6 +209,7 @@ fun MainApp(
         BottomSheetMusic(
             currentMusic = currentMusic!!,
             musicViewModel = musicViewModel,
+            visualizerViewModel = visualizerViewModel,
             onDismiss = { showMusicDetail = it }
         )
     }

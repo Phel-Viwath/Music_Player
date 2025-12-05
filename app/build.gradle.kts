@@ -7,12 +7,22 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.hilt.android)
     alias(libs.plugins.ksp)
-    id("com.google.gms.google-services")
+    alias(libs.plugins.gms.google.services)
+    alias(libs.plugins.firebase.crashlytics)
 }
 
 android {
     namespace = "com.viwath.music_player"
     compileSdk = 36
+
+//    signingConfigs {
+//        create("release"){
+//            storeFile = file("")
+//            storePassword = ""
+//            keyAlias = ""
+//            keyPassword = ""
+//        }
+//    }
 
     defaultConfig {
         applicationId = "com.viwath.music_player"
@@ -31,6 +41,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            //signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -56,8 +67,8 @@ tasks.withType<KotlinCompile>().configureEach {
 
 dependencies {
     implementation(platform(libs.firebase.bom))
-    implementation("com.google.firebase:firebase-crashlytics")
-    implementation("com.google.firebase:firebase-analytics")
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

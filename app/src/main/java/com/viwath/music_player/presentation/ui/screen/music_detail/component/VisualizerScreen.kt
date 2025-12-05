@@ -1,12 +1,8 @@
 package com.viwath.music_player.presentation.ui.screen.music_detail.component
 
 import android.util.Log
-import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
@@ -20,23 +16,63 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.rotate
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.viwath.music_player.core.util.AudioLevels
 import com.viwath.music_player.presentation.viewmodel.VisualizerViewModel
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.cos
 import kotlin.math.sin
+import kotlin.random.Random
+
+data class VisualizerParticle(
+    var x: Float = 0f,
+    var y: Float = 0f,
+    var size: Float = 0f,
+    var angle: Float = 0f,
+    var speed: Float = 0f,
+    var radius: Float = 0f,
+    var alpha: Float = 0f,
+    var active: Boolean = false
+)
+
+@Preview(showBackground = false)
+@Composable
+fun PreviewNCSVisualizer() {
+//    // Generate some sample waveform data for preview
+//    val sampleWaveform = ByteArray(128) { i ->
+//        (sin(i * 0.1) * 127 * sin(i * 0.05)).toInt().toByte()
+//    }
+
+    val frequencies = FloatArray(128) { i ->
+        (sin(i * 0.1) * 126 * sin(i * 0.05)).toFloat()
+    }
+
+    val sampleAudioLevels = AudioLevels(
+        bass = 0.6f,
+        mid = 0.8f,
+        treble = 0.4f
+    )
+
+    Box(
+        modifier = Modifier.size(400.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        NCSStyleVisualizer3(
+            modifier = Modifier.fillMaxSize(),
+            frequencies = frequencies,
+            audioLevels = sampleAudioLevels
+        )
+    }
+}
 
 @Composable
 fun VisualizerScreen(
@@ -44,11 +80,11 @@ fun VisualizerScreen(
     viewModel: VisualizerViewModel
 ) {
     val isPlaying by viewModel.isPlaying.observeAsState(false)
-    val waveformData by viewModel.waveformData.collectAsState()
+    // val waveformData by viewModel.waveformData.collectAsState()
     val audioLevels by viewModel.audioLevel.collectAsState()
+    val frequencies by viewModel.frequencyBand.collectAsState()
 
     LaunchedEffect(isPlaying) {
-        Log.d("VisualizerScreen", "Playback state changed: $isPlaying")
         if (isPlaying) {
             viewModel.onPlaybackStarted()
         }
@@ -65,9 +101,9 @@ fun VisualizerScreen(
         contentAlignment = Alignment.Center
     ) {
         if (isPlaying) {
-            NCSStyleVisualizer(
+            NCSStyleVisualizer3(
                 modifier = Modifier.fillMaxSize(),
-                waveform = waveformData,
+                frequencies = frequencies,
                 audioLevels = audioLevels
             )
         } else {
@@ -80,6 +116,203 @@ fun VisualizerScreen(
     }
 }
 
+@Composable
+fun NCSStyleVisualizer3(
+    modifier: Modifier = Modifier,
+    frequencies: FloatArray,
+    audioLevels: AudioLevels,
+) {
+    // Particle system
+    val particles = remember { List(40) { VisualizerParticle() } }
+
+    // Smooth bass animation
+    val animatedBass by animateFloatAsState(
+        targetValue = audioLevels.bass,
+        animationSpec = tween(durationMillis = 80, easing = LinearEasing),
+        label = "BassPulse"
+    )
+
+    // Smooth mid animation for subtle effects
+    val animatedMid by animateFloatAsState(
+        targetValue = audioLevels.mid,
+        animationSpec = tween(durationMillis = 100, easing = LinearEasing),
+        label = "MidPulse"
+    )
+
+    Box(modifier = modifier, contentAlignment = Alignment.Center) {
+
+        // Background glow effect
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val centerX = size.width / 2
+            val centerY = size.height / 2
+
+            // Subtle background glow that pulses with bass
+            drawCircle(
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = 0.03f + animatedBass * 0.05f),
+                        Color.Transparent
+                    ),
+                    center = Offset(centerX, centerY),
+                    radius = 300.dp.toPx()
+                ),
+                radius = 300.dp.toPx(),
+                center = Offset(centerX, centerY)
+            )
+        }
+
+        // Main visualizer canvas
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val centerX = size.width / 2
+            val centerY = size.height / 2
+
+            // Base radius that pulses with bass
+            val baseRadius = (90.dp.toPx()) + (animatedBass * 15.dp.toPx())
+            val maxBarHeight = size.minDimension * 0.30f
+
+            val barCount = frequencies.size
+            val angleStep = PI.toFloat() / barCount
+
+            // Normalize frequencies - find the max value
+            val maxMagnitude = frequencies.maxOrNull() ?: 0.01f
+            val normalizedFrequencies = if (maxMagnitude > 0.01f) {
+                frequencies.map { (it / maxMagnitude).coerceIn(0f, 1f) }.toFloatArray()
+            } else {
+                frequencies
+            }
+
+            // Draw frequency bars (mirrored on both sides)
+            normalizedFrequencies.forEachIndexed { index, magnitude ->
+                val barHeight = magnitude * maxBarHeight
+
+                // Start from bottom (270 degrees)
+                val theta = (index * angleStep) + (PI.toFloat() / 2)
+
+                // Calculate positions
+                val rX = centerX + baseRadius * cos(theta)
+                val rY = centerY + baseRadius * sin(theta)
+                val rEndX = centerX + (baseRadius + barHeight) * cos(theta)
+                val rEndY = centerY + (baseRadius + barHeight) * sin(theta)
+
+                // Color gradient based on position (NCS style: white with slight color tint)
+                val barColor = when {
+                    index < barCount / 3 -> {
+                        // Bass frequencies - slight cyan tint
+                        Color.White.copy(alpha = 0.9f)
+                    }
+                    index < barCount * 2 / 3 -> {
+                        // Mid frequencies - pure white
+                        Color.White.copy(alpha = 0.95f)
+                    }
+                    else -> {
+                        // High frequencies - slight blue tint
+                        Color(0xFFEEF5FF)
+                    }
+                }
+
+                // Right side bar
+                drawLine(
+                    color = barColor,
+                    start = Offset(rX, rY),
+                    end = Offset(rEndX, rEndY),
+                    strokeWidth = 8f + (magnitude * 4f),
+                    cap = StrokeCap.Round
+                )
+
+                // Add glow for prominent bars
+                if (magnitude > 0.3f) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.3f * magnitude),
+                        start = Offset(rX, rY),
+                        end = Offset(rEndX, rEndY),
+                        strokeWidth = 16f + (magnitude * 8f),
+                        cap = StrokeCap.Round
+                    )
+                }
+
+                // Left side bar (mirrored)
+                val lX = centerX - baseRadius * cos(theta)
+                val lEndX = centerX - (baseRadius + barHeight) * cos(theta)
+
+                drawLine(
+                    color = barColor,
+                    start = Offset(lX, rY),
+                    end = Offset(lEndX, rEndY),
+                    strokeWidth = 8f + (magnitude * 4f),
+                    cap = StrokeCap.Round
+                )
+
+                // Glow for left side
+                if (magnitude > 0.3f) {
+                    drawLine(
+                        color = Color.White.copy(alpha = 0.3f * magnitude),
+                        start = Offset(lX, rY),
+                        end = Offset(lEndX, rEndY),
+                        strokeWidth = 16f + (magnitude * 8f),
+                        cap = StrokeCap.Round
+                    )
+                }
+            }
+
+            // Spawn particles on strong bass hits
+            if (audioLevels.bass > 0.5f && Random.nextFloat() > 0.7f) {
+                val activeParticle = particles.firstOrNull { !it.active }
+                activeParticle?.let {
+                    it.active = true
+                    it.angle = Random.nextFloat() * 2 * PI.toFloat()
+                    it.radius = baseRadius + (maxBarHeight * Random.nextFloat() * 0.6f)
+                    it.speed = 3f + Random.nextFloat() * 6f
+                    it.alpha = 0.8f
+                    it.x = centerX + it.radius * cos(it.angle)
+                    it.y = centerY + it.radius * sin(it.angle)
+                }
+            }
+
+            // Update and draw particles
+            particles.filter { it.active }.forEach { p ->
+                p.radius += p.speed
+                p.alpha -= 0.015f
+                p.x = centerX + p.radius * cos(p.angle)
+                p.y = centerY + p.radius * sin(p.angle)
+
+                if (p.alpha <= 0f || p.radius > size.minDimension) {
+                    p.active = false
+                }
+
+                drawCircle(
+                    color = Color.White.copy(alpha = p.alpha.coerceIn(0f, 1f)),
+                    radius = 3f,
+                    center = Offset(p.x, p.y)
+                )
+
+                // Particle glow
+                drawCircle(
+                    color = Color.White.copy(alpha = (p.alpha * 0.3f).coerceIn(0f, 1f)),
+                    radius = 8f,
+                    center = Offset(p.x, p.y)
+                )
+            }
+
+            // Inner circle border (thin white ring around album art)
+            drawCircle(
+                color = Color.White.copy(alpha = 0.4f + animatedMid * 0.2f),
+                radius = baseRadius,
+                center = Offset(centerX, centerY),
+                style = Stroke(width = 2f)
+            )
+
+            // Outer decorative ring
+            drawCircle(
+                color = Color.White.copy(alpha = 0.15f),
+                radius = baseRadius + maxBarHeight * 0.5f,
+                center = Offset(centerX, centerY),
+                style = Stroke(width = 1f)
+            )
+        }
+    }
+}
+
+/*
 @Composable
 fun NCSStyleVisualizer(
     modifier: Modifier = Modifier,
@@ -377,30 +610,4 @@ private fun DrawScope.drawEnergyLines(
             )
         }
     }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF000000)
-@Composable
-fun PreviewNCSVisualizer() {
-    // Generate some sample waveform data for preview
-    val sampleWaveform = ByteArray(128) { i ->
-        (sin(i * 0.1) * 127 * sin(i * 0.05)).toInt().toByte()
-    }
-
-    val sampleAudioLevels = AudioLevels(
-        bass = 0.3f,
-        mid = 0.5f,
-        treble = 0.4f
-    )
-
-    Box(
-        modifier = Modifier.size(400.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        NCSStyleVisualizer(
-            modifier = Modifier.fillMaxSize(),
-            waveform = sampleWaveform,
-            audioLevels = sampleAudioLevels
-        )
-    }
-}
+} */
