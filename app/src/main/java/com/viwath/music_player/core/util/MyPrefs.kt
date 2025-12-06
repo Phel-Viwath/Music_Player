@@ -14,4 +14,13 @@ class MyPrefs(context: Context){
         return sharedPreferences.getString(key, defaultValue) ?: defaultValue
     }
 
+    fun saveBool(key: String, value: Boolean){
+        sharedPreferences.edit { putBoolean(key, value) }
+    }
+
+    fun getBool(key: String, defaultValue: Boolean): Boolean{
+        return sharedPreferences.getBoolean(key, defaultValue)
+    }
+
+
 }

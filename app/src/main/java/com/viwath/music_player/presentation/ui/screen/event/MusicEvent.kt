@@ -30,4 +30,6 @@ sealed class MusicEvent {
     data class OnSeekTo(val position: Long): MusicEvent()
     data class OnPlay(val music: MusicDto, val musics: List<MusicDto> = emptyList()): MusicEvent()
 
+    data object ShowVisualizer: MusicEvent()
+
 }

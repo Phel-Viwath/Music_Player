@@ -1,12 +1,17 @@
 package com.viwath.music_player.presentation.ui.screen.music_detail
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.SwitchRight
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -14,8 +19,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -49,6 +56,8 @@ fun MusicDetailScreen(
     val currentMusicFavorite = favorViewModel.state.value.isFavorite
     var showMoreMenu by remember { mutableStateOf(false) }
 
+    val isShowVisualizer = viewModel.visualizerSwitch.value
+
     LaunchedEffect(favorViewModel){
         favorViewModel.onEvent(FavorEvent.CheckFavorite(music.id))
     }
@@ -80,78 +89,99 @@ fun MusicDetailScreen(
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
+                .fillMaxSize()
                 .statusBarsPadding()
         ) {
-//            ImageContent(
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .weight(1f),
-//                music = currentMusic
-//            )
-
-            VisualizerScreen(
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f),
-                visualizerViewModel
-            )
-
-            ControlContent(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .weight(1f),
-                musicDto = currentMusic,
-                favoriteToggleState = if (isCurrentFavorite) {
-                    FavoriteToggleState.FAVORITE
-                } else {
-                    if (isFavorite) FavoriteToggleState.FAVORITE
-                    else FavoriteToggleState.NOT_FAVORITE
-                },
-                playbackState = playbackState,
-                playingMode = playbackState.playingMode,
-                onFavoriteClick = {
-                    isFavorite = !isFavorite
-                    if (isFavorite) {
-                        favorViewModel.onEvent(FavorEvent.AddCurrentFavorite(currentMusic.id.toString()))
-                        favorViewModel.onEvent(FavorEvent.PasteInsertData(currentMusic))
-                        favorViewModel.onEvent(FavorEvent.InsertFavorite)
-                    }else{
-                        favorViewModel.onEvent(FavorEvent.RemoveCurrentFavorite(currentMusic.id.toString()))
-                        favorViewModel.onEvent(FavorEvent.PasteDeleteData(currentMusic))
-                        favorViewModel.onEvent(FavorEvent.DeleteFavorite)
-                    }
-                },
-                onSeekTo = { position -> viewModel.onEvent(MusicEvent.OnSeekTo(position)) },
-                onPreviousClick = { viewModel.onEvent(MusicEvent.OnPlayPrevious) },
-                onNextClick = { viewModel.onEvent(MusicEvent.OnPlayNext) },
-                onRepeatClick = {
-                    when(playbackState.playingMode){
-                        PlayingMode.REPEAT_ALL -> {
-                            viewModel.onEvent(MusicEvent.OnRepeatOne)
-                            PlayingMode.REPEAT_ONE
-                        }
-                        PlayingMode.REPEAT_ONE -> {
-                            viewModel.onEvent(MusicEvent.ShuffleMode(true))
-                            PlayingMode.SHUFFLE
-                        }
-                        PlayingMode.SHUFFLE -> {
-                            viewModel.onEvent(MusicEvent.ShuffleMode(false))
-                            viewModel.onEvent(MusicEvent.OnRepeatAll)
-                            PlayingMode.REPEAT_ALL
-                        }
-                    }
-                },
-                onPlayPauseClick = {
-                    if (!playbackState.isPlaying)
-                        viewModel.onEvent(MusicEvent.OnPlay(currentMusic))
-                    else viewModel.onEvent(MusicEvent.OnPause)
-                },
-                onMoreClick = {
-                    showMoreMenu = true
+                    .weight(1f)
+            ){
+                if (isShowVisualizer){
+                    VisualizerScreen(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        visualizerViewModel
+                    )
                 }
-            )
+                else {
+                    ImageContent(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        music = currentMusic
+                    )
+                }
+
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+            ){
+                IconButton(
+                    onClick = { viewModel.onEvent(MusicEvent.ShowVisualizer) },
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                ){
+                    Icon(imageVector = Icons.Default.Refresh, contentDescription = "switch icon")
+                }
+
+                ControlContent(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    musicDto = currentMusic,
+                    favoriteToggleState = if (isCurrentFavorite) {
+                        FavoriteToggleState.FAVORITE
+                    } else {
+                        if (isFavorite) FavoriteToggleState.FAVORITE
+                        else FavoriteToggleState.NOT_FAVORITE
+                    },
+                    playbackState = playbackState,
+                    playingMode = playbackState.playingMode,
+                    onFavoriteClick = {
+                        isFavorite = !isFavorite
+                        if (isFavorite) {
+                            favorViewModel.onEvent(FavorEvent.AddCurrentFavorite(currentMusic.id.toString()))
+                            favorViewModel.onEvent(FavorEvent.PasteInsertData(currentMusic))
+                            favorViewModel.onEvent(FavorEvent.InsertFavorite)
+                        }else{
+                            favorViewModel.onEvent(FavorEvent.RemoveCurrentFavorite(currentMusic.id.toString()))
+                            favorViewModel.onEvent(FavorEvent.PasteDeleteData(currentMusic))
+                            favorViewModel.onEvent(FavorEvent.DeleteFavorite)
+                        }
+                    },
+                    onSeekTo = { position -> viewModel.onEvent(MusicEvent.OnSeekTo(position)) },
+                    onPreviousClick = { viewModel.onEvent(MusicEvent.OnPlayPrevious) },
+                    onNextClick = { viewModel.onEvent(MusicEvent.OnPlayNext) },
+                    onRepeatClick = {
+                        when(playbackState.playingMode){
+                            PlayingMode.REPEAT_ALL -> {
+                                viewModel.onEvent(MusicEvent.OnRepeatOne)
+                                PlayingMode.REPEAT_ONE
+                            }
+                            PlayingMode.REPEAT_ONE -> {
+                                viewModel.onEvent(MusicEvent.ShuffleMode(true))
+                                PlayingMode.SHUFFLE
+                            }
+                            PlayingMode.SHUFFLE -> {
+                                viewModel.onEvent(MusicEvent.ShuffleMode(false))
+                                viewModel.onEvent(MusicEvent.OnRepeatAll)
+                                PlayingMode.REPEAT_ALL
+                            }
+                        }
+                    },
+                    onPlayPauseClick = {
+                        if (!playbackState.isPlaying)
+                            viewModel.onEvent(MusicEvent.OnPlay(currentMusic))
+                        else viewModel.onEvent(MusicEvent.OnPause)
+                    },
+                    onMoreClick = {
+                        showMoreMenu = true
+                    }
+                )
+            }
 
         }
     }

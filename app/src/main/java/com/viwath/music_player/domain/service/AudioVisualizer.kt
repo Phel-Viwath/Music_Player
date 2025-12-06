@@ -8,7 +8,6 @@ import androidx.media3.exoplayer.ExoPlayer
 import com.viwath.music_player.core.util.AudioLevels
 import kotlin.math.hypot
 import kotlin.math.log10
-import kotlin.math.sqrt
 
 @SuppressLint("UnsafeOptInUsageError")
 class AudioVisualizer(

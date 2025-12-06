@@ -8,6 +8,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.viwath.music_player.core.util.DeleteResult
 import com.viwath.music_player.core.util.MyPrefs
 import com.viwath.music_player.core.util.Resource
@@ -39,6 +40,8 @@ class MusicViewModel @Inject constructor(
     private val clearCacheUseCase: ClearCacheUseCase,
     private val myPrefs: MyPrefs
 ): ViewModel(){
+
+
     private val _state = mutableStateOf(MusicState())
     val state: State<MusicState> get() = _state
 
@@ -61,16 +64,19 @@ class MusicViewModel @Inject constructor(
     private val _deleteResult = MutableSharedFlow<String>()
     val deleteResult: SharedFlow<String?> = _deleteResult
 
+    private val _visualizerSwitch = mutableStateOf(false)
+    val visualizerSwitch: State<Boolean> get() = _visualizerSwitch
+
     // Keep track of music to delete after permission
     private var pendingDeleteMusic: Music? = null
 
 
     init {
+        getVisualizerState()
         musicPlayerManager.bindService()
         // get order from shared preferences
         getOrder()
         // load music files
-
         viewModelScope.launch {
             musicPlayerManager.isConnected.collect { isConnected ->
                 if (isConnected){
@@ -123,12 +129,40 @@ class MusicViewModel @Inject constructor(
             is MusicEvent.OnPlay -> playMusic(event.music, event.musics)
             is MusicEvent.GetOrder -> getOrder()
 
+            is MusicEvent.ShowVisualizer -> saveVisualizerState()
         }
     }
 
     override fun onCleared() {
         super.onCleared()
         musicPlayerManager.unbindService()
+    }
+
+    private fun saveVisualizerState(){
+        val newValue = !visualizerSwitch.value
+        _visualizerSwitch.value = newValue
+        viewModelScope.launch {
+            try {
+                myPrefs.saveBool(MyKey.VisualizerKey.name, newValue)
+            }catch (e: Exception){
+                FirebaseCrashlytics.getInstance().recordException(e)
+                Log.e("MusicViewModel", "saveVisualizerState: ${e.message}")
+                _message.emit(e.message ?: "Unknown error")
+            }
+        }
+    }
+
+    private fun getVisualizerState() {
+        viewModelScope.launch {
+            try {
+                _visualizerSwitch.value = myPrefs.getBool(MyKey.VisualizerKey.name, false)
+            }catch (e: Exception){
+                _visualizerSwitch.value = !visualizerSwitch.value
+                FirebaseCrashlytics.getInstance().recordException(e)
+                Log.e("MusicViewModel", "saveVisualizerState: ${e.message}")
+                _message.emit(e.message ?: "Unknown error")
+            }
+        }
     }
 
     private fun loadMusicFiles(){
@@ -314,4 +348,8 @@ class MusicViewModel @Inject constructor(
         }
     }
 
+}
+
+enum class MyKey{
+    VisualizerKey
 }

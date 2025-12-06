@@ -136,7 +136,6 @@ class VisualizerViewModel @Inject constructor(
         visualizerUpdateJob?.cancel()
 
         visualizerUpdateJob = viewModelScope.launch {
-            Log.d("VisualizerViewModel", "startAudioDataUpdates: ${_isPlaying.value == true}")
             while (_isPlaying.value == true) {
                 val newBands = audioVisualizer.getFrequencyBand(64)
 
@@ -148,7 +147,6 @@ class VisualizerViewModel @Inject constructor(
 
                     // Only update levels if we got bands
                     _audioLevel.value = audioVisualizer.getAudioLevels()
-                    Log.d("VisualizerViewModel", "startAudioDataUpdates: ${audioVisualizer.getAudioLevels()}")
                 }
 
                 // Check waveform only if needed (heavy operation)

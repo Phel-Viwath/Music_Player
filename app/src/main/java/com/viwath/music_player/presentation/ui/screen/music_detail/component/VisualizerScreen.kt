@@ -154,9 +154,9 @@ fun NCSStyleVisualizer3(
                         Color.Transparent
                     ),
                     center = Offset(centerX, centerY),
-                    radius = 300.dp.toPx()
+                    radius = 250.dp.toPx()
                 ),
-                radius = 300.dp.toPx(),
+                radius = 250.dp.toPx(),
                 center = Offset(centerX, centerY)
             )
         }
@@ -222,7 +222,7 @@ fun NCSStyleVisualizer3(
                 // Add glow for prominent bars
                 if (magnitude > 0.3f) {
                     drawLine(
-                        color = Color.White.copy(alpha = 0.3f * magnitude),
+                        color = Color.Green.copy(alpha = 0.3f * magnitude),
                         start = Offset(rX, rY),
                         end = Offset(rEndX, rEndY),
                         strokeWidth = 16f + (magnitude * 8f),
